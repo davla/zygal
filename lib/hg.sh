@@ -1,5 +1,5 @@
 #!/bin/sh
 
-hg_info() {
+zygal_hg_info() {
     true
 }
