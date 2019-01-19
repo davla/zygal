@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
 hg_info() {
     true
