@@ -25,7 +25,7 @@ git_info() {
 }
 
 git_remote() {
-    GIT_PS1_SHOWUPSTREAM=${GIT_PS1_SHOWUPSTREAM-'auto'}
+    local GIT_PS1_SHOWUPSTREAM=${GIT_PS1_SHOWUPSTREAM-'auto'}
+    git fetch
     __git_ps1 "${1-[%s]}"
-    unset GIT_PS1_SHOWUPSTREAM
 }
