@@ -18,6 +18,8 @@ GIT_PS1_SHOWUNTRACKEDFILES=${GIT_PS1_SHOWUNTRACKEDFILES-'1'}
 # shellcheck disable=SC2034
 GIT_PS1_STATESEPARATOR=${GIT_PS1_STATESEPARATOR-' '}
 
+GIT_PS1_SHOWUPSTREAM=${GIT_PS1_SHOWUPSTREAM-'auto'}
+
 type __git_ps1 1> /dev/null 2>&1 || . /usr/lib/git-core/git-sh-prompt
 
 zygal_git_info() {
@@ -25,7 +27,6 @@ zygal_git_info() {
 }
 
 zygal_git_remote() {
-    local GIT_PS1_SHOWUPSTREAM=${GIT_PS1_SHOWUPSTREAM-'auto'}
     git fetch
     __git_ps1 "${1-[%s]}"
 }
