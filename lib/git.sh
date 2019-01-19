@@ -23,10 +23,20 @@ GIT_PS1_SHOWUPSTREAM=${GIT_PS1_SHOWUPSTREAM-'auto'}
 type __git_ps1 1> /dev/null 2>&1 || . /usr/lib/git-core/git-sh-prompt
 
 zygal_git_info() {
-    __git_ps1 "${1-[%s]}"
+    if git status &> /dev/null; then
+        local FORMAT="$1" GIT_INFO
+
+        local SEP="$GIT_PS1_STATESEPARATOR"
+        local BRANCH="$(git symbolic-ref --short HEAD)"
+
+        __git_ps1 '%s' | sed -E "s/$BRANCH($SEP)*/${BRANCH}${SEP}/" \
+            | xargs -i printf -- "$FORMAT" '{}'
+    fi
 }
 
 zygal_git_remote() {
-    git fetch
-    __git_ps1 "${1-[%s]}"
+    if git status &> /dev/null; then
+        git fetch
+        zygal_git_info "$1"
+    fi
 }
