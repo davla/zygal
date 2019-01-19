@@ -1,21 +1,26 @@
 #!/usr/bin/env zsh
 
-PARENT_DIR="${${(%):-%x}:h:P}"
+ZYGAL_THEME_ROOT=${${(%):-%x}:h:h}
 
-source "$PARENT_DIR/../deps/zsh-async/async.zsh"
-source "$PARENT_DIR/../lib/git.sh"
+source "$ZYGAL_THEME_ROOT/deps/zsh-async/async.zsh"
+source "$ZYGAL_THEME_ROOT/lib/git.sh"
 
-append_git() {
+zygal_append_git() {
     PROMPT="${ZYGAL_PRE_VCS}${3}${ZYGAL_POST_VCS}"
     zle reset-prompt
 }
 
-async_init
+zygal_async_init() {
+    async_init
 
-async_start_worker git_base
-async_register_callback git_base append_git
-async_job git_base git_info $ZYGAL_VCS
+    async_start_worker zygal_git_base
+    async_register_callback zygal_git_base zygal_append_git
 
-async_start_worker git_remote
-async_register_callback git_remote append_git
-async_job git_remote git_remote $ZYGAL_VCS
+    async_start_worker zygal_git_remote
+    async_register_callback zygal_git_remote zygal_append_git
+}
+
+zygal_async() {
+    async_job zygal_git_base zygal_git_info "$ZYGAL_VCS"
+    async_job zygal_git_remote zygal_git_remote "$ZYGAL_VCS"
+}

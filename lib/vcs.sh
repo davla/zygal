@@ -11,7 +11,7 @@ PARENT_DIR="$(dirname "$THIS_SCRIPT" | xargs readlink -f)"
 source "$PARENT_DIR/git.sh"
 source "$PARENT_DIR/hg.sh"
 
-vcs_info() {
-    git_info "$1"
-    hg_info "$1"
+zygal_vcs_info() {
+    zygal_git_info "$1"
+    zygal_hg_info "$1"
 }

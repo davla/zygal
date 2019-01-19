@@ -20,11 +20,11 @@ GIT_PS1_STATESEPARATOR=${GIT_PS1_STATESEPARATOR-' '}
 
 type __git_ps1 1> /dev/null 2>&1 || . /usr/lib/git-core/git-sh-prompt
 
-git_info() {
+zygal_git_info() {
     __git_ps1 "${1-[%s]}"
 }
 
-git_remote() {
+zygal_git_remote() {
     local GIT_PS1_SHOWUPSTREAM=${GIT_PS1_SHOWUPSTREAM-'auto'}
     git fetch
     __git_ps1 "${1-[%s]}"
