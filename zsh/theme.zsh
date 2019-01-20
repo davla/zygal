@@ -3,12 +3,11 @@
 # Escape sequence to reset all the prompt styles
 ZYGAL_RESET='%f%k'
 
-ZYGAL_THEME_ROOT=${${(%):-%x}:h:h}
+ZYGAL_THEME_ROOT=${${(%):-%x}:h:h:P}
 source "$ZYGAL_THEME_ROOT/lib/vcs.sh"
 
 PROMPT_SUBST=true
 ZYGAL_ASYNC="${ZYGAL_ASYNC-true}"
-ZYGAL_ENABLE_VCS_REMOTE="${ZYGAL_ENABLE_VCS_REMOTE-true}"
 
 if $ZYGAL_ASYNC; then
     source "$ZYGAL_THEME_ROOT/zsh/async.zsh"
@@ -26,6 +25,10 @@ zygal_theme() {
 └─%# $ZYGAL_RESET "
     typeset -g ZYGAL_VCS="%%F{$TEXT_COLOR}%%K{$VCS_BG} [%s]%s \
 ${ZYGAL_RESET//\%/%%}"
+
+    $ZYGAL_VCS_REMOTE \
+        && ZYGAL_VCS_REMOTE_COUNT=$(( (ZYGAL_VCS_REMOTE_COUNT + 1) \
+            % ZYGAL_VCS_REMOTE_SYNC_TRIGGER ))
 
     if $ZYGAL_ASYNC; then
         PROMPT="${ZYGAL_PRE_VCS}${ZYGAL_POST_VCS}"

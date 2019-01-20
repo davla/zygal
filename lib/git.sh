@@ -41,8 +41,5 @@ zygal_git_info() {
 }
 
 zygal_git_remote() {
-    if git status &> /dev/null; then
-        git fetch
-        zygal_git_info "$1"
-    fi
+    git status &> /dev/null && git fetch
 }
