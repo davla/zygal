@@ -6,10 +6,10 @@ elif [ -n "$ZSH_VERSION" ]; then
     THIS_SCRIPT="${(%):-%x}"
 fi
 
-PARENT_DIR="$(dirname "$THIS_SCRIPT" | xargs readlink -f)"
+ZYGAL_THEME_ROOT="$(dirname "$THIS_SCRIPT" | xargs -i readlink -f '{}/..')"
 
-source "$PARENT_DIR/git.sh"
-source "$PARENT_DIR/hg.sh"
+source "$ZYGAL_THEME_ROOT/lib/git.sh"
+source "$ZYGAL_THEME_ROOT/lib/hg.sh"
 
 zygal_vcs_info() {
     zygal_git_info "$1"
