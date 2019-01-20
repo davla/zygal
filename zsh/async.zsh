@@ -18,15 +18,20 @@ zygal_async_init() {
     async_start_worker zygal_git_base
     async_register_callback zygal_git_base zygal_append_git
 
-    async_start_worker zygal_git_remote
-    async_register_callback zygal_git_remote zygal_append_git
+    if $ZYGAL_ENABLE_VCS_REMOTE; then
+        async_start_worker zygal_git_remote
+        async_register_callback zygal_git_remote zygal_append_git
+    fi
 }
 
 zygal_async() {
     local PWD_CMD="cd $PWD"
-    async_worker_eval zygal_git_base "$PWD_CMD"
-    async_worker_eval zygal_git_remote "$PWD_CMD"
 
+    async_worker_eval zygal_git_base "$PWD_CMD"
     async_job zygal_git_base zygal_git_info "$ZYGAL_VCS"
-    async_job zygal_git_remote zygal_git_remote "$ZYGAL_VCS"
+
+    if $ZYGAL_ENABLE_VCS_REMOTE; then
+        async_worker_eval zygal_git_remote "$PWD_CMD"
+        async_job zygal_git_remote zygal_git_remote "$ZYGAL_VCS"
+    fi
 }

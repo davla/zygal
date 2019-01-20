@@ -8,6 +8,7 @@ source "$ZYGAL_THEME_ROOT/lib/vcs.sh"
 
 PROMPT_SUBST=true
 ZYGAL_ASYNC="${ZYGAL_ASYNC-true}"
+ZYGAL_ENABLE_VCS_REMOTE="${ZYGAL_ENABLE_VCS_REMOTE-true}"
 
 if $ZYGAL_ASYNC; then
     source "$ZYGAL_THEME_ROOT/zsh/async.zsh"
