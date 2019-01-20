@@ -6,8 +6,10 @@ source "$ZYGAL_THEME_ROOT/deps/zsh-async/async.zsh"
 source "$ZYGAL_THEME_ROOT/lib/git.sh"
 
 zygal_append_git() {
-    PROMPT="${ZYGAL_PRE_VCS}${3}${ZYGAL_POST_VCS}"
-    zle reset-prompt
+    if [ -n "$3" ]; then
+        PROMPT="${ZYGAL_PRE_VCS}${3}${ZYGAL_POST_VCS}"
+        zle reset-prompt
+    fi
 }
 
 zygal_async_init() {
@@ -21,6 +23,10 @@ zygal_async_init() {
 }
 
 zygal_async() {
+    local PWD_CMD="cd $PWD"
+    async_worker_eval zygal_git_base "$PWD_CMD"
+    async_worker_eval zygal_git_remote "$PWD_CMD"
+
     async_job zygal_git_base zygal_git_info "$ZYGAL_VCS"
     async_job zygal_git_remote zygal_git_remote "$ZYGAL_VCS"
 }
