@@ -24,13 +24,18 @@ type __git_ps1 1> /dev/null 2>&1 || . /usr/lib/git-core/git-sh-prompt
 
 zygal_git_info() {
     if git status &> /dev/null; then
-        local FORMAT="$1" GIT_INFO
+        local FORMAT="$1"
 
         local SEP="$GIT_PS1_STATESEPARATOR"
         local BRANCH="$(git symbolic-ref --short HEAD)"
+        local GIT_INFO="$(__git_ps1 '%s')"
 
-        __git_ps1 '%s' | sed -E "s/$BRANCH($SEP)*/${BRANCH}${SEP}/" \
-            | xargs -i printf -- "$FORMAT" '{}'
+        if [ "$GIT_INFO" != "$BRANCH" ]; then
+            GIT_INFO="$(sed -E "s/$BRANCH($SEP)*/${BRANCH}${SEP}/" \
+                <<<"$GIT_INFO")"
+        fi
+
+        printf -- "$FORMAT" "$GIT_INFO"
     fi
 }
 
