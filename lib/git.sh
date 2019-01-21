@@ -23,7 +23,7 @@ GIT_PS1_STATESEPARATOR=${GIT_PS1_STATESEPARATOR-' '}
 
 type __git_ps1 &> /dev/null || source /usr/lib/git-core/git-sh-prompt
 
-zygal_git_info() {
+zygal_git_prompt_info() {
     if git status &> /dev/null; then
         local FORMAT="$1"
 
@@ -40,6 +40,6 @@ zygal_git_info() {
     fi
 }
 
-zygal_git_remote() {
+zygal_git_sync_remote() {
     git status &> /dev/null && git fetch
 }

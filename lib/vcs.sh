@@ -16,14 +16,14 @@ source "$ZYGAL_THEME_ROOT/lib/git.sh"
 source "$ZYGAL_THEME_ROOT/lib/hg.sh"
 
 zygal_vcs_info() {
-    zygal_git_info "$1"
-    zygal_hg_info "$1"
-
-    $ZYGAL_VCS_REMOTE && ! $ZYGAL_ASYNC && zygal_vcs_remote
+    zygal_git_prompt_info "$1"
+    zygal_hg_prompt_info "$1"
 }
 
-zygal_vcs_remote() {
+zygal_vcs_info_remote() {
     if [ "$ZYGAL_VCS_REMOTE_COUNT" -eq 0 ]; then
-        zygal_git_remote
+        zygal_git_sync_remote
     fi
+
+    zygal_vcs_info "$1"
 }

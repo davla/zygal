@@ -7,9 +7,9 @@ ZYGAL_THEME_ROOT=${${(%):-%x}:h:h:P}
 source "$ZYGAL_THEME_ROOT/lib/vcs.sh"
 
 PROMPT_SUBST=true
-ZYGAL_ASYNC="${ZYGAL_ASYNC-true}"
+ZYGAL_ASYNC="${ZYGAL_ASYNC-remote}"
 
-if $ZYGAL_ASYNC; then
+if [ "$ZYGAL_ASYNC" != 'none' ]; then
     source "$ZYGAL_THEME_ROOT/zsh/async.zsh"
     zygal_async_init
 fi
@@ -30,13 +30,23 @@ ${ZYGAL_RESET//\%/%%}"
         && ZYGAL_VCS_REMOTE_COUNT=$(( (ZYGAL_VCS_REMOTE_COUNT + 1) \
             % ZYGAL_VCS_REMOTE_SYNC_TRIGGER ))
 
-    if $ZYGAL_ASYNC; then
-        PROMPT="${ZYGAL_PRE_VCS}${ZYGAL_POST_VCS}"
-        zygal_async
-    else
-        ZYGAL_VCS="$(zygal_vcs_info "$ZYGAL_VCS")"
-        PROMPT="${ZYGAL_PRE_VCS}${ZYGAL_VCS}${ZYGAL_POST_VCS}"
-    fi
+    case "$ZYGAL_ASYNC" in
+        'all')
+            PROMPT="${ZYGAL_PRE_VCS}${ZYGAL_POST_VCS}"
+            zygal_async
+            ;;
+
+        'remote')
+            ZYGAL_VCS="$(zygal_vcs_info "$ZYGAL_VCS")"
+            PROMPT="${ZYGAL_PRE_VCS}${ZYGAL_VCS}${ZYGAL_POST_VCS}"
+            zygal_async
+            ;;
+
+        'none')
+            ZYGAL_VCS="$(zygal_vcs_info_remote "$ZYGAL_VCS")"
+            PROMPT="${ZYGAL_PRE_VCS}${ZYGAL_VCS}${ZYGAL_POST_VCS}"
+            ;;
+    esac
 }
 
 add-zsh-hook precmd zygal_theme
