@@ -26,6 +26,15 @@ zygal_theme() {
     typeset -g ZYGAL_VCS="%%F{$TEXT_COLOR}%%K{$VCS_BG} [%s]%s \
 ${ZYGAL_RESET//\%/%%}"
 
+    # If this is an xterm set the title to user@host:dir
+    case "$TERM" in
+        xterm*|rxvt*)
+            print -Pn '\033]2;%n@%M %2(~.*/%1~.%~)\007'
+            ;;
+        *)
+            ;;
+    esac
+
     $ZYGAL_VCS_REMOTE \
         && ZYGAL_VCS_REMOTE_COUNT=$(( (ZYGAL_VCS_REMOTE_COUNT + 1) \
             % ZYGAL_VCS_REMOTE_SYNC_TRIGGER ))
