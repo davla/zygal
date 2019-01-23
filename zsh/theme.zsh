@@ -1,12 +1,9 @@
 #!/usr/bin/env zsh
 
-# Escape sequence to reset all the prompt styles
-ZYGAL_RESET='%f%k'
-
 ZYGAL_THEME_ROOT=${${(%):-%x}:h:h:P}
+
 source "$ZYGAL_THEME_ROOT/lib/vcs.sh"
 
-PROMPT_SUBST=true
 ZYGAL_ASYNC="${ZYGAL_ASYNC-remote}"
 
 if [ "$ZYGAL_ASYNC" != 'none' ]; then
@@ -14,8 +11,13 @@ if [ "$ZYGAL_ASYNC" != 'none' ]; then
     zygal_async_init
 fi
 
+# Escape sequence to reset all the prompt styles
+ZYGAL_RESET='%f%k'
+
+PROMPT_SUBST=true
+
 zygal_theme() {
-    local COLORSCHEME="${1:-orange}"
+    local COLORSCHEME="${1:-${ZYGAL_COLORSCHEME:-orange}}"
 
     [ ! -f "$COLORSCHEME" ] \
         && COLORSCHEME="$ZYGAL_THEME_ROOT/colorschemes/$COLORSCHEME.sh"
@@ -26,7 +28,7 @@ zygal_theme() {
 %K{$CWD_BG} %2(~.*/%1~.%~) $ZYGAL_RESET"
     typeset -g ZYGAL_POST_VCS=$'\n'"%F{$TEXT_COLOR}%K{$USER_HOST_BG} \
 └─%# $ZYGAL_RESET "
-    typeset -g ZYGAL_VCS="%%F{$TEXT_COLOR}%%K{$VCS_BG} [%s]%s \
+    typeset -g ZYGAL_VCS_FORMAT="%%F{$TEXT_COLOR}%%K{$VCS_BG} [%s]%s \
 ${ZYGAL_RESET//\%/%%}"
 
     # If this is an xterm set the title to user@host:dir
@@ -49,13 +51,13 @@ ${ZYGAL_RESET//\%/%%}"
             ;;
 
         'remote')
-            ZYGAL_VCS="$(zygal_vcs_info "$ZYGAL_VCS")"
+            local ZYGAL_VCS="$(zygal_vcs_info "$ZYGAL_VCS_FORMAT")"
             PROMPT="${ZYGAL_PRE_VCS}${ZYGAL_VCS}${ZYGAL_POST_VCS}"
             zygal_async
             ;;
 
         'none')
-            ZYGAL_VCS="$(zygal_vcs_info_remote "$ZYGAL_VCS")"
+            local ZYGAL_VCS="$(zygal_vcs_info_remote "$ZYGAL_VCS_FORMAT")"
             PROMPT="${ZYGAL_PRE_VCS}${ZYGAL_VCS}${ZYGAL_POST_VCS}"
             ;;
     esac
