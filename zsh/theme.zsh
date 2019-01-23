@@ -17,7 +17,10 @@ fi
 zygal_theme() {
     local COLORSCHEME="${1:-orange}"
 
-    source "$ZYGAL_THEME_ROOT/colorschemes/$COLORSCHEME.sh"
+    [ ! -f "$COLORSCHEME" ] \
+        && COLORSCHEME="$ZYGAL_THEME_ROOT/colorschemes/$COLORSCHEME.sh"
+
+    source "$COLORSCHEME"
 
     typeset -g ZYGAL_PRE_VCS="%F{$TEXT_COLOR}%K{$USER_HOST_BG} %n@%M \
 %K{$CWD_BG} %2(~.*/%1~.%~) $ZYGAL_RESET"
