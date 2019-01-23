@@ -20,13 +20,6 @@ echo "readonly ZYGAL_PRE_VCS='%F{$TEXT_COLOR}%K{$USER_HOST_BG} %n@%M %K{$CWD_BG}
 echo "readonly ZYGAL_VCS_FORMAT='%%F{$TEXT_COLOR}%%K{$VCS_BG} [%s]%s ${ZYGAL_RESET//\%/%%}'"
 echo "readonly ZYGAL_POST_VCS=$'\\\\n''%F{$TEXT_COLOR}%K{$USER_HOST_BG} └─%# $ZYGAL_RESET '"
 
-echo "case \"\$TERM\" in
-    xterm*|rxvt*)
-        print -Pn '\\\\033]2;%n@%M %2(~.*/%1~.%~)\\\\007'
-        ;;
-    *)
-        ;;
-esac"
 echo 'PROMPT_SUBST=true'
 
 source "$ZYGAL_THEME_ROOT/lib/git.sh"
@@ -63,7 +56,7 @@ if [ "$ZYGAL_ASYNC" != 'none' ]; then
     }
 
     echo 'zygal_async() {'
-    PWD_CMD='"cd $PWD"'
+    PWD_CMD='cd $PWD'
 
     [ "$ZYGAL_ASYNC" = 'all' ] && {
         echo "\tasync_worker_eval zygal_vcs_base \"$PWD_CMD\""
@@ -77,6 +70,10 @@ if [ "$ZYGAL_ASYNC" != 'none' ]; then
 
     echo '}'
 fi
+
+alias add-zsh-hook='true'
+source "$ZYGAL_THEME_ROOT/zsh/theme.zsh" > /dev/null
+type -f zygal_xterm_title
 
 echo 'zygal-theme() {'
     $ZYGAL_VCS_REMOTE \
@@ -100,4 +97,6 @@ echo 'zygal-theme() {'
             ;;
     esac
 echo '}'
+
+echo 'add-zsh-hook chpwd zygal_xterm_title'
 echo 'add-zsh-hook precmd zygal-theme'

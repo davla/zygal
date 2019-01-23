@@ -16,6 +16,17 @@ ZYGAL_RESET='%f%k'
 
 PROMPT_SUBST=true
 
+zygal_xterm_title() {
+    # If this is an xterm set the title to user@host:dir
+    case "$TERM" in
+        xterm*|rxvt*)
+            print -Pn '\033]2;%n@%M %2(~.*/%1~.%~)\007'
+            ;;
+        *)
+            ;;
+    esac
+}
+
 zygal_theme() {
     local COLORSCHEME="${1:-${ZYGAL_COLORSCHEME:-orange}}"
 
@@ -30,15 +41,6 @@ zygal_theme() {
 └─%# $ZYGAL_RESET "
     typeset -g ZYGAL_VCS_FORMAT="%%F{$TEXT_COLOR}%%K{$VCS_BG} [%s]%s \
 ${ZYGAL_RESET//\%/%%}"
-
-    # If this is an xterm set the title to user@host:dir
-    case "$TERM" in
-        xterm*|rxvt*)
-            print -Pn '\033]2;%n@%M %2(~.*/%1~.%~)\007'
-            ;;
-        *)
-            ;;
-    esac
 
     $ZYGAL_VCS_REMOTE \
         && ZYGAL_VCS_REMOTE_COUNT=$(( (ZYGAL_VCS_REMOTE_COUNT + 1) \
@@ -64,3 +66,6 @@ ${ZYGAL_RESET//\%/%%}"
 }
 
 add-zsh-hook precmd zygal_theme
+add-zsh-hook chpwd zygal_xterm_title
+
+zygal_xterm_title
