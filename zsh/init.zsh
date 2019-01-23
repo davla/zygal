@@ -8,7 +8,11 @@ ZYGAL_THEME_ROOT="${${(%):-%x}:h:h:P}"
 #
 ###############################################################################
 
-source "$ZYGAL_THEME_ROOT/colorschemes/$ZYGAL_COLORSCHEME.sh"
+[ -f "$ZYGAL_COLORSCHEME" ] \
+    && COLORSCHEME="$ZYGAL_COLORSCHEME" \
+    || COLORSCHEME="$ZYGAL_THEME_ROOT/colorschemes/$ZYGAL_COLORSCHEME.sh"
+
+source "$COLORSCHEME"
 
 ZYGAL_RESET='%f%k'
 
