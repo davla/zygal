@@ -52,21 +52,22 @@ if [ "$ZYGAL_ASYNC" != 'none' ]; then
     echo 'async_init'
 
     [ "$ZYGAL_ASYNC" = 'all' ] && {
-        echo 'async_start_worker zygal_vcs_base'
-        echo 'async_register_callback zygal_vcs_base zygal_append_vcs'
+        echo 'async_start_worker zygal_worker_vcs_base'
+        echo 'async_register_callback zygal_worker_vcs_base zygal_append_vcs'
     }
 
     echo 'zygal_async() {'
     PWD_CMD='cd $PWD'
 
     [ "$ZYGAL_ASYNC" = 'all' ] && {
-        echo "\tasync_worker_eval zygal_vcs_base \"$PWD_CMD\""
-        echo '\tasync_job zygal_vcs_base zygal_vcs_info "$ZYGAL_VCS_FORMAT"'
+        echo "\tasync_worker_eval zygal_worker_vcs_base \"$PWD_CMD\""
+        echo -n '\tasync_job zygal_worker_vcs_base zygal_vcs_info '
+        echo '"$ZYGAL_VCS_FORMAT"'
     }
 
     $ZYGAL_ENABLE_VCS_REMOTE && {
         echo '\t[ "$ZYGAL_VCS_REMOTE_COUNT" -eq 0 ] && {'
-        echo "\t\ttypeset -g ZYGAL_WORKER_NAME='zygal_vcs_remote'"
+        echo "\t\ttypeset -g ZYGAL_WORKER_NAME='zygal_worker_vcs_remote'"
 
         echo '\t\tasync_start_worker "$ZYGAL_WORKER_NAME"'
         echo -n '\t\tasync_register_callback "$ZYGAL_WORKER_NAME" '
