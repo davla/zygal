@@ -59,7 +59,10 @@ ${ZYGAL_RESET//\%/%%}"
             ;;
 
         'none')
-            local ZYGAL_VCS="$(zygal_vcs_info_remote "$ZYGAL_VCS_FORMAT")"
+            [ "$ZYGAL_VCS_REMOTE_COUNT" -eq 0 ] \
+                && local ZYGAL_VCS="$(zygal_vcs_info_remote \
+                    "$ZYGAL_VCS_FORMAT")" \
+                || local ZYGAL_VCS="$(zygal_vcs_info "$ZYGAL_VCS_FORMAT")"
             PROMPT="${ZYGAL_PRE_VCS}${ZYGAL_VCS}${ZYGAL_POST_VCS}"
             ;;
     esac

@@ -41,5 +41,6 @@ zygal_git_prompt_info() {
 }
 
 zygal_git_sync_remote() {
+    echo remote synch >> /home/maze/zygal.txt
     git status &> /dev/null && git fetch
 }

@@ -21,9 +21,7 @@ zygal_vcs_info() {
 }
 
 zygal_vcs_info_remote() {
-    if [ "$ZYGAL_VCS_REMOTE_COUNT" -eq 0 ]; then
-        zygal_git_sync_remote
-    fi
+    zygal_git_sync_remote
 
     zygal_vcs_info "$1"
 }
