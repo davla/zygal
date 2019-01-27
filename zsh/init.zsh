@@ -86,28 +86,31 @@ source "$ZYGAL_THEME_ROOT/zsh/theme.zsh" > /dev/null
 type -f zygal_xterm_title
 
 echo 'zygal-theme() {'
-    $ZYGAL_VCS_REMOTE && {
-        echo -n '\tZYGAL_VCS_REMOTE_COUNT=$(( (ZYGAL_VCS_REMOTE_COUNT + 1) % '
-        echo "$ZYGAL_VCS_REMOTE_SYNC_TRIGGER ))"
-    }
+$ZYGAL_VCS_REMOTE && {
+    echo -n '\tZYGAL_VCS_REMOTE_COUNT=$(( (ZYGAL_VCS_REMOTE_COUNT + 1) % '
+    echo "$ZYGAL_VCS_REMOTE_SYNC_TRIGGER ))"
+}
 
-    case "$ZYGAL_ASYNC" in
-        'all')
-            echo 'PROMPT="${ZYGAL_PRE_VCS}${ZYGAL_POST_VCS}"'
-            echo 'zygal_async'
-            ;;
+case "$ZYGAL_ASYNC" in
+    'all')
+        echo '\tPROMPT="${ZYGAL_PRE_VCS}${ZYGAL_POST_VCS}"'
+        echo '\tzygal_async'
+        ;;
 
-        'remote')
-            echo '\tlocal ZYGAL_VCS="$(zygal_vcs_info "$ZYGAL_VCS_FORMAT")"'
-            echo '\tPROMPT="${ZYGAL_PRE_VCS}${ZYGAL_VCS}${ZYGAL_POST_VCS}"'
-            echo '\tzygal_async'
-            ;;
+    'remote')
+        echo '\tlocal ZYGAL_VCS="$(zygal_vcs_info "$ZYGAL_VCS_FORMAT")"'
+        echo '\tPROMPT="${ZYGAL_PRE_VCS}${ZYGAL_VCS}${ZYGAL_POST_VCS}"'
+        echo '\tzygal_async'
+        ;;
 
-        'none')
-            echo '\tlocal ZYGAL_VCS="$(zygal_vcs_info_remote "$ZYGAL_VCS")"'
-            echo '\tPROMPT="${ZYGAL_PRE_VCS}${ZYGAL_VCS}${ZYGAL_POST_VCS}"'
-            ;;
-    esac
+    'none')
+        echo '\t[ "$ZYGAL_VCS_REMOTE_COUNT" -eq 0 ] \'
+        echo -n '\t\t&& local ZYGAL_VCS="$(zygal_vcs_info_remote '
+        echo '"$ZYGAL_VCS_FORMAT")" \'
+        echo '\t\t|| local ZYGAL_VCS="$(zygal_vcs_info "$ZYGAL_VCS_FORMAT")"'
+        echo '\tPROMPT="${ZYGAL_PRE_VCS}${ZYGAL_VCS}${ZYGAL_POST_VCS}"'
+        ;;
+esac
 echo '}'
 
 echo 'add-zsh-hook chpwd zygal_xterm_title'
