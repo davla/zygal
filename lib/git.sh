@@ -24,23 +24,22 @@ GIT_PS1_STATESEPARATOR=${GIT_PS1_STATESEPARATOR-' '}
 type __git_ps1 &> /dev/null || source /usr/lib/git-core/git-sh-prompt
 
 zygal_git_prompt_info() {
-    if git status &> /dev/null; then
+    git status &> /dev/null && {
         local FORMAT="$1"
 
         local SEP="$GIT_PS1_STATESEPARATOR"
         local BRANCH="$(git symbolic-ref --short HEAD)"
         local GIT_INFO="$(__git_ps1 '%s')"
 
-        if [ "$GIT_INFO" != "$BRANCH" ]; then
+        [ "$GIT_INFO" != "$BRANCH" ] && {
             GIT_INFO="$(sed -E "s/$BRANCH($SEP)*/${BRANCH}${SEP}/" \
                 <<<"$GIT_INFO")"
-        fi
+        }
 
         printf -- "$FORMAT" "$GIT_INFO"
-    fi
+    }
 }
 
 zygal_git_sync_remote() {
-    echo remote synch >> /home/maze/zygal.txt
     git status &> /dev/null && git fetch
 }

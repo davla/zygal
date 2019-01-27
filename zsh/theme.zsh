@@ -5,10 +5,10 @@ ZYGAL_THEME_ROOT=${${(%):-%x}:h:h:P}
 source "$ZYGAL_THEME_ROOT/lib/config.sh"
 source "$ZYGAL_THEME_ROOT/lib/vcs.sh"
 
-if [ "$ZYGAL_ASYNC" != 'none' ]; then
+[ "$ZYGAL_ASYNC" != 'none' ] && {
     source "$ZYGAL_THEME_ROOT/zsh/async.zsh"
     zygal_async_init
-fi
+}
 
 # Escape sequence to reset all the prompt styles
 ZYGAL_RESET='%f%k'
@@ -23,7 +23,7 @@ zygal_theme() {
             ;;
     esac
 
-    local COLORSCHEME="${1:-${ZYGAL_COLORSCHEME:-orange}}"
+    local COLORSCHEME="${1:-$ZYGAL_COLORSCHEME}"
 
     [ ! -f "$COLORSCHEME" ] \
         && COLORSCHEME="$ZYGAL_THEME_ROOT/colorschemes/$COLORSCHEME.sh"

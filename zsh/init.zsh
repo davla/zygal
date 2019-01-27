@@ -45,7 +45,7 @@ $ZYGAL_ENABLE_VCS_REMOTE && {
     type -f zygal_vcs_info_remote
 }
 
-if [ "$ZYGAL_ASYNC" != 'none' ]; then
+[ "$ZYGAL_ASYNC" != 'none' ] && {
     echo "source \"$ZYGAL_THEME_ROOT/deps/zsh-async/async.zsh\""
 
     source "$ZYGAL_THEME_ROOT/zsh/async.zsh"
@@ -81,7 +81,7 @@ if [ "$ZYGAL_ASYNC" != 'none' ]; then
     }
 
     echo '}'
-fi
+}
 
 echo 'case "$TERM" in'
 echo '\txterm*|rxvt*)'
