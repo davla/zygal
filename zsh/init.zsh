@@ -81,11 +81,19 @@ if [ "$ZYGAL_ASYNC" != 'none' ]; then
     echo '}'
 fi
 
-alias add-zsh-hook='true'
-source "$ZYGAL_THEME_ROOT/zsh/theme.zsh" > /dev/null
-type -f zygal_xterm_title
+echo 'case "$TERM" in'
+echo '\txterm*|rxvt*)'
+echo -n '\t\talias zygal_xterm_title="print -Pn '
+echo "'\\\\033]2;%n@%M %2(~.*/%1~.%~)\\\\007'\""
+echo '\t\t;;'
+echo '\t*)'
+echo '\t\talias zygal_xterm_title=true'
+echo '\t\t;;'
+echo 'esac'
 
 echo 'zygal-theme() {'
+
+echo '\tzygal_xterm_title'
 $ZYGAL_VCS_REMOTE && {
     echo -n '\tZYGAL_VCS_REMOTE_COUNT=$(( (ZYGAL_VCS_REMOTE_COUNT + 1) % '
     echo "$ZYGAL_VCS_REMOTE_SYNC_TRIGGER ))"
@@ -113,5 +121,4 @@ case "$ZYGAL_ASYNC" in
 esac
 echo '}'
 
-echo 'add-zsh-hook chpwd zygal_xterm_title'
 echo 'add-zsh-hook precmd zygal-theme'
