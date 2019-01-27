@@ -1,5 +1,13 @@
 #!/bin/sh
 
+if [ -n "$BASH_VERSION" ]; then
+    THIS_SCRIPT="${BASH_SOURCES[0]}"
+elif [ -n "$ZSH_VERSION" ]; then
+    THIS_SCRIPT="${(%):-%x}"
+fi
+
+ZYGAL_THEME_ROOT="$(dirname "$THIS_SCRIPT" | xargs -i readlink -f '{}/..')"
+
 ZYGAL_ASYNC="${ZYGAL_ASYNC:-remote}"
 
 ZYGAL_ENABLE_VCS_REMOTE="${ZYGAL_ENABLE_VCS_REMOTE-true}"
@@ -9,3 +17,7 @@ $ZYGAL_ENABLE_VCS_REMOTE && {
 }
 
 ZYGAL_COLORSCHEME=${ZYGAL_COLORSCHEME:-orange}
+
+ZYGAL_ZSH_ASYNC_PATH="${ZYGAL_ZSH_ASYNC_PATH:-$ZYGAL_THEME_ROOT\
+/deps/zsh-async/async.zsh}"
+ZYGAL_GIT_PS1_PATH="${ZYGAL_GIT_PS1_PATH:-/usr/lib/git-core/git-sh-prompt}"

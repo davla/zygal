@@ -33,7 +33,7 @@ source "$ZYGAL_THEME_ROOT/lib/hg.sh"
 source "$ZYGAL_THEME_ROOT/lib/vcs.sh"
 
 typeset | grep -P '^GIT_PS1'
-grep -P 'source.+git-core' "$ZYGAL_THEME_ROOT/lib/git.sh"
+echo "type __git_ps1 &> /dev/null || source $ZYGAL_GIT_PS1_PATH"
 
 type -f zygal_git_prompt_info
 type -f zygal_hg_prompt_info
@@ -46,7 +46,7 @@ $ZYGAL_ENABLE_VCS_REMOTE && {
 }
 
 [ "$ZYGAL_ASYNC" != 'none' ] && {
-    echo "source \"$ZYGAL_THEME_ROOT/deps/zsh-async/async.zsh\""
+    echo "source $ZYGAL_ZSH_ASYNC_PATH"
 
     source "$ZYGAL_THEME_ROOT/zsh/async.zsh"
     type -f zygal_append_vcs
