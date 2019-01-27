@@ -28,14 +28,13 @@ zygal_git_prompt_info() {
     git status &> /dev/null && {
         local FORMAT="$1"
 
-        local SEP="$GIT_PS1_STATESEPARATOR"
-        local BRANCH="$(git symbolic-ref --short HEAD)"
         local GIT_INFO="$(__git_ps1 '%s')"
+        local SEP="$GIT_PS1_STATESEPARATOR"
+        local BRANCH="$(git symbolic-ref --short HEAD 2> /dev/null)"
 
-        [ "$GIT_INFO" != "$BRANCH" ] && {
+        [ -n "$BRANCH" ] && [ "$GIT_INFO" != "$BRANCH" ] && \
             GIT_INFO="$(sed -E "s/$BRANCH($SEP)*/${BRANCH}${SEP}/" \
                 <<<"$GIT_INFO")"
-        }
 
         printf -- "$FORMAT" "$GIT_INFO"
     }
