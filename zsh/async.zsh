@@ -2,8 +2,8 @@
 
 ZYGAL_THEME_ROOT=${${(%):-%x}:h:h}
 
-source "$ZYGAL_THEME_ROOT/deps/zsh-async/async.zsh"
-source "$ZYGAL_THEME_ROOT/lib/git.sh"
+source "$ZYGAL_THEME_ROOT/lib/config.sh"
+source "$ZYGAL_ZSH_ASYNC_PATH"
 
 zygal_append_vcs() {
     [ -n "$3" ] && {

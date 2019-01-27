@@ -6,7 +6,7 @@ source "$ZYGAL_THEME_ROOT/lib/config.sh"
 source "$ZYGAL_THEME_ROOT/lib/vcs.sh"
 
 [ "$ZYGAL_ASYNC" != 'none' ] && {
-    source "$ZYGAL_ZSH_ASYNC_PATH"
+    source "$ZYGAL_THEME_ROOT/zsh/async.zsh"
     zygal_async_init
 }
 
