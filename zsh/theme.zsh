@@ -15,18 +15,13 @@ ZYGAL_RESET='%f%k'
 
 PROMPT_SUBST=true
 
-# If this is an xterm set the title to user@host:dir
-case "$TERM" in
-    xterm*|rxvt*)
-        alias zygal_xterm_title="print -Pn '\033]2;%n@%M %2(~.*/%1~.%~)\007'"
-        ;;
-    *)
-        alias zygal_xterm_title=true
-        ;;
-esac
-
 zygal_theme() {
-    zygal_xterm_title
+    # If this is an xterm set the title to user@host:dir
+    case "$TERM" in
+        xterm*|rxvt*)
+            print -Pn '\033]2;%n@%M %2(~.*/%1~.%~)\007'
+            ;;
+    esac
 
     local COLORSCHEME="${1:-${ZYGAL_COLORSCHEME:-orange}}"
 
