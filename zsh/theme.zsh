@@ -30,12 +30,12 @@ zygal_theme() {
 
     source "$COLORSCHEME"
 
-    typeset -g ZYGAL_PRE_VCS="%F{$TEXT_COLOR}%K{$USER_HOST_BG} %n@%M \
-%K{$CWD_BG} %2(~.*/%1~.%~) $ZYGAL_RESET"
-    typeset -g ZYGAL_POST_VCS=$'\n'"%F{$TEXT_COLOR}%K{$USER_HOST_BG} \
-└─%# $ZYGAL_RESET "
-    typeset -g ZYGAL_VCS_FORMAT="%%F{$TEXT_COLOR}%%K{$VCS_BG} [%s]%s \
-${ZYGAL_RESET//\%/%%}"
+    typeset -g ZYGAL_PRE_VCS="%F{$ZYGAL_TEXT_COLOR}%K{$ZYGAL_USER_HOST_BG} \
+%n@%M %K{$ZYGAL_CWD_BG} %2(~.*/%1~.%~) $ZYGAL_RESET"
+    typeset -g ZYGAL_POST_VCS=$'\n'"%F{$ZYGAL_TEXT_COLOR}\
+%K{$ZYGAL_USER_HOST_BG} └─%# $ZYGAL_RESET "
+    typeset -g ZYGAL_VCS_FORMAT="%%F{$ZYGAL_TEXT_COLOR}%%K{$ZYGAL_VCS_BG} \
+[%s]%s ${ZYGAL_RESET//\%/%%}"
 
     $ZYGAL_ENABLE_VCS_REMOTE \
         && ZYGAL_VCS_REMOTE_COUNT=$(( (ZYGAL_VCS_REMOTE_COUNT + 1) \

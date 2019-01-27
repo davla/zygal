@@ -19,12 +19,12 @@ source "$COLORSCHEME"
 
 ZYGAL_RESET='%f%k'
 
-echo -n "readonly ZYGAL_PRE_VCS='%F{$TEXT_COLOR}%K{$USER_HOST_BG} %n@%M "
-echo "%K{$CWD_BG} %2(~.*/%1~.%~) $ZYGAL_RESET'"
-echo -n "readonly ZYGAL_VCS_FORMAT='%%F{$TEXT_COLOR}%%K{$VCS_BG} [%s]%s "
-echo "${ZYGAL_RESET//\%/%%}'"
-echo -n "readonly ZYGAL_POST_VCS=$'\\\\n''%F{$TEXT_COLOR}%K{$USER_HOST_BG} "
-echo "└─%# $ZYGAL_RESET '"
+echo -n "readonly ZYGAL_PRE_VCS='%F{$ZYGAL_TEXT_COLOR}%K{$ZYGAL_USER_HOST_BG} "
+echo "%n@%M %K{$ZYGAL_CWD_BG} %2(~.*/%1~.%~) $ZYGAL_RESET'"
+echo -n "readonly ZYGAL_VCS_FORMAT='%%F{$ZYGAL_TEXT_COLOR}%%K{$ZYGAL_VCS_BG} "
+echo "[%s]%s ${ZYGAL_RESET//\%/%%}'"
+echo -n "readonly ZYGAL_POST_VCS=$'\\\\n''%F{$ZYGAL_TEXT_COLOR}"
+echo "%K{$ZYGAL_USER_HOST_BG} └─%# $ZYGAL_RESET '"
 
 echo 'PROMPT_SUBST=true'
 
