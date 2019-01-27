@@ -2,9 +2,8 @@
 
 ZYGAL_THEME_ROOT=${${(%):-%x}:h:h:P}
 
+source "$ZYGAL_THEME_ROOT/lib/config.sh"
 source "$ZYGAL_THEME_ROOT/lib/vcs.sh"
-
-ZYGAL_ASYNC="${ZYGAL_ASYNC-remote}"
 
 if [ "$ZYGAL_ASYNC" != 'none' ]; then
     source "$ZYGAL_THEME_ROOT/zsh/async.zsh"
@@ -43,7 +42,7 @@ zygal_theme() {
     typeset -g ZYGAL_VCS_FORMAT="%%F{$TEXT_COLOR}%%K{$VCS_BG} [%s]%s \
 ${ZYGAL_RESET//\%/%%}"
 
-    $ZYGAL_VCS_REMOTE \
+    $ZYGAL_ENABLE_VCS_REMOTE \
         && ZYGAL_VCS_REMOTE_COUNT=$(( (ZYGAL_VCS_REMOTE_COUNT + 1) \
             % ZYGAL_VCS_REMOTE_SYNC_TRIGGER ))
 
@@ -60,10 +59,12 @@ ${ZYGAL_RESET//\%/%%}"
             ;;
 
         'none')
-            [ "$ZYGAL_VCS_REMOTE_COUNT" -eq 0 ] \
-                && local ZYGAL_VCS="$(zygal_vcs_info_remote \
-                    "$ZYGAL_VCS_FORMAT")" \
-                || local ZYGAL_VCS="$(zygal_vcs_info "$ZYGAL_VCS_FORMAT")"
+            if $ZYGAL_ENABLE_VCS_REMOTE \
+                && [ "$ZYGAL_VCS_REMOTE_COUNT" -eq 0 ]; then
+                local ZYGAL_VCS="$(zygal_vcs_info_remote "$ZYGAL_VCS_FORMAT")"
+            else
+                local ZYGAL_VCS="$(zygal_vcs_info "$ZYGAL_VCS_FORMAT")"
+            fi
             PROMPT="${ZYGAL_PRE_VCS}${ZYGAL_VCS}${ZYGAL_POST_VCS}"
             ;;
     esac
