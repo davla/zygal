@@ -33,8 +33,8 @@ zygal_git_prompt_info() {
         local BRANCH="$(git symbolic-ref --short HEAD 2> /dev/null)"
 
         [ -n "$BRANCH" ] && [ "$GIT_INFO" != "$BRANCH" ] && \
-            GIT_INFO="$(sed -E "s/$BRANCH($SEP)*/${BRANCH}${SEP}/" \
-                <<<"$GIT_INFO")"
+            GIT_INFO="$(sed -E "s|$BRANCH($SEP)*|${BRANCH}${SEP}|" \
+                <<<"${GIT_INFO//|/\\|}")"
 
         printf -- "$FORMAT" "$GIT_INFO"
     }
