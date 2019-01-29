@@ -68,17 +68,19 @@ variables need to be defined only when the code is generated.
     Whether VCS remote sync features should be enabled at all.
 
 
-- `ZYGAL_GIT_PS1_PATH` (default `/usr/lib/git-core/git-sh-prompt`):  
+- `ZYGAL_GIT_PROMPT_PATH` (default `/usr/lib/git-core/git-sh-prompt`):  
     The path to the file defining `__git_ps1`. This is the default location
     on Debian systems, so you might need to specify a different one.
 
 
 - `ZYGAL_VCS_REMOTE_REFRESH_COUNT` (default `10`):  
     The number of prompt refresh that will trigger VCS remote sync.
+    Unset if `ZYGAL_ENABLE_VCS_REMOTE` is `false`.
 
 
 - `ZYGAL_ZSH_ASYNC_PATH` (default: `<zygal_root>/deps/zsh-async`):  
     The path to [zsh-async](https://github.com/mafredri/zsh-async) library.
+    Unset if `ZYGAL_ASYNC` is `none`.
 
     Zygal comes shipped with its own version of `zsh-async` as a submodule.
     However, you might not want to use that, for a number of reasons:
@@ -139,3 +141,4 @@ be set to empty strings, rather than `false`, to be disabled.
 - Mercurial support.
 - Auto discover git-prompt files.
 - Bash port.
+- Integrate with zsh theme mechanism.
