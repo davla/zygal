@@ -90,6 +90,46 @@ variables need to be defined only when the code is generated.
     source `zsh-async` from that location. Be aware that using a different
     version than the submodule one might break zygal!
 
+### Git information
+Zygal uses `__git_ps1` under the hood, so its configuration variables are used.
+They can of course be overridden as other zygal configuration variables. You
+can find more information about the available `__git_ps1` configuration
+variables in the [`git-prompt`](https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh)
+file shipped with git itself, in the comments at the beginning of the file.
+Below, the `__git_ps1` variables that are set by zygal to a default value if
+not defined. All the other ones are unset.
+
+**NOTE**: due to the way `__git_ps1` and zygal work, these variables need to
+be set to empty strings, rather than `false`, to be disabled.  
+
+- `GIT_PS1_SHOWDIRTYSTATE` (default: `true`):  
+    Shows modifications of unstaged tracked files (`*`) and the presence of
+    staged files (`+`).
+
+- `GIT_PS1_SHOWSTASHSTATE` (default: `true`):  
+    Shows the presence of stashes (`$`).
+
+- `GIT_PS1_SHOWUNTRACKEDFILES` (default: `true`):  
+    Shows the presence of untracked files (`%`).
+
+- `GIT_PS1_SHOWUPSTREAM` (default: `auto`):  
+    Shows information about the relative state of the current branch and its
+    upstream. The default value displays:
+    - `<` when the local branch is behind its upstream.
+    - `>` when the local branch is ahead its upstream.
+    - `=` when the local branch is even with its upstream.
+    - `<>` when the local branch has diverged from its upstream.
+    </ul>
+
+    For other values for `GIT_PS1_SHOWUPSTREAM`, check the comments at the
+    beginning of [`git-prompt`](https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh)
+    to find out more.
+
+
+- `GIT_PS1_STATESEPARATOR` (default: ` `):  
+    The separator between the current branch name and the git status flags.
+    Unlike `__git_ps1` this is displayed also when the only flag is the
+    upstream one.
 
 ## Roadmap
 - More colorschemes.
