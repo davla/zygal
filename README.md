@@ -24,8 +24,8 @@ with a *z*.
     it draws the prompt, if you set the configuration variables only in
     your `.zshrc`?
 - **Customizable colorschemes**: if you're not happy with my aesthetic taste,
-    you can [create your own colorscheme](#colorschemes). Just define a bunch
-    of variables in a file, and you're good to go.
+    you can [create your own colorscheme](#custom-colorschemes). Just define a
+    bunch of variables in a file, and you're good to go.
 
 ## Colorschemes
 #### Orange
@@ -60,7 +60,7 @@ variables need to be defined only when the code is generated.
     - `none`: no VCS information is asynchronously loaded.
 
 
-- <span id="colorschemes">`ZYGAL_COLORSCHEME` (default: `orange`)</span>:  
+- <a id="custom-colorschemes">`ZYGAL_COLORSCHEME` (default: `orange`)</a>:  
     The colorscheme zygal will use, either as a name or as a path.  
 
     A name means that the corresponding file in the
@@ -137,12 +137,10 @@ be set to empty strings, rather than `false`, to be disabled.
     - `>` when the local branch is ahead its upstream.
     - `=` when the local branch is even with its upstream.
     - `<>` when the local branch has diverged from its upstream.
-    </ul>
 
     For other values for `GIT_PS1_SHOWUPSTREAM`, check the comments at the
     beginning of [`git-prompt`](https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh)
     to find out more.
-
 
 - `GIT_PS1_STATESEPARATOR` (default: ` `):  
     The separator between the current branch name and the git status flags.
