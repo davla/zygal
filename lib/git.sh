@@ -22,7 +22,7 @@ GIT_PS1_SHOWUPSTREAM=${GIT_PS1_SHOWUPSTREAM-'auto'}
 GIT_PS1_STATESEPARATOR=${GIT_PS1_STATESEPARATOR-' '}
 
 type __git_ps1 &> /dev/null \
-    || source "${ZYGAL_GIT_PS1_PATH:-/usr/lib/git-core/git-sh-prompt}"
+    || source "${ZYGAL_GIT_PROMPT_PATH:-/usr/lib/git-core/git-sh-prompt}"
 
 zygal_git_prompt_info() {
     git status &> /dev/null && {

@@ -33,7 +33,7 @@ source "$ZYGAL_THEME_ROOT/lib/hg.sh"
 source "$ZYGAL_THEME_ROOT/lib/vcs.sh"
 
 typeset | grep -P '^GIT_PS1'
-echo "type __git_ps1 &> /dev/null || source $ZYGAL_GIT_PS1_PATH"
+echo "type __git_ps1 &> /dev/null || source $ZYGAL_GIT_PROMPT_PATH"
 
 type -f zygal_git_prompt_info
 type -f zygal_hg_prompt_info
