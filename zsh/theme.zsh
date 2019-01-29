@@ -1,5 +1,7 @@
 #!/usr/bin/env zsh
 
+autoload -Uz add-zsh-hook
+
 ZYGAL_THEME_ROOT=${${(%):-%x}:h:h:P}
 
 source "$ZYGAL_THEME_ROOT/lib/config.sh"

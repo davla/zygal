@@ -126,4 +126,5 @@ case "$ZYGAL_ASYNC" in
 esac
 echo '}'
 
+echo 'autoload -Uz add-zsh-hook'
 echo 'add-zsh-hook precmd zygal-theme'
