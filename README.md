@@ -1,8 +1,7 @@
 # zygal
-
 Asynchronous lightweight prompt for zsh.
 
-[screenshot]
+![orange](doc/orange.png)
 
 Zygal is meant to be a simple and minimal prompt: no eye-candy python
 powerlines, no fancy fonts, just plain Unicode symbols and background colors.
@@ -27,6 +26,10 @@ with a *z*.
 - **Customizable colorschemes**: if you're not happy with my aesthetic taste,
     you can [create your own colorscheme](#colorschemes). Just define a bunch
     of variables in a file, and you're good to go.
+
+## Colorschemes
+#### Orange
+![orange prompt](doc/orange-prompt.png)
 
 ## Installation
 
