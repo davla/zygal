@@ -3,29 +3,42 @@ Asynchronous lightweight prompt for zsh.
 
 ![orange](doc/orange.png)
 
-Zygal is meant to be a simple and minimal prompt: no eye-candy python
-powerlines, no fancy fonts, just plain Unicode symbols and background colors.
-No complex statuses are displayed as well: just *user@host*, the current
-working directory, and VCS information when inside a VCS repository. The latter
-is very spartan, and simply reuses `__git_ps1` with barely noticeable
-adjustments. Git is the only supported VCS so far, but mercurial support is
-coming very soon.
-
-**Why *zygal*?** Well, the dictionary says it means *Having a shape like a
-yoke or like the letter H*. It just looks very cool, and plus, it starts
-with a *z*.
-
-### Features
+## Features
 - **Simple & fast**: it doesn't look fancy, but in return it's fast and
     require no third-party tools setup.
 - **Asynchronous**: you shouldn't wait to type in your terminal: those VCS
     symbols you've just seen three seconds ago should wait instead.
+- **VCS remote sync**: it's nice to automatically synchronize your local
+    repository with the remote one, at least every now and then.
 - **Static code generation**: why should your shell execute logic every time
     it draws the prompt, if you set the configuration variables only in
     your `.zshrc`?
 - **Customizable colorschemes**: if you're not happy with my aesthetic taste,
     you can [create your own colorscheme](#custom-colorschemes). Just define a
     bunch of variables in a file, and you're good to go.
+
+## Description
+Zygal is meant to be a simple and minimal prompt: no eye-candy python
+powerlines, no fancy fonts, just plain Unicode symbols and background colors.
+
+No complex statuses are displayed as well: just *user@host*, the current
+working directory, and VCS information when inside a VCS repository. The latter
+is very spartan, and simply reuses `__git_ps1` with barely noticeable
+adjustments. Git is the only supported VCS so far, but mercurial support is
+coming very soon.
+
+**Why background colors?** I prefer colored text on black background myself,
+at least aesthetically. However, have you ever run a very verbose command twice
+in a row? It's always annoying to scroll up and squint to find where the output
+for the second run begins. And sometimes `less` doesn't go well with colored
+output, not even with the `-r` option, and then you have to squint at the
+whole output instead of just trying to find where it begins. But if your
+prompt is a blast of colors in your  eyeballs, your life is going to be much
+easier!
+
+**Why *zygal*?** Well, the dictionary says it means *Having a shape like a
+yoke or like the letter H*. It just looks very cool, and plus, it starts
+with a *z*.
 
 ## Colorschemes
 #### Orange
@@ -65,7 +78,7 @@ variables need to be defined only when the code is generated.
     - `none`: no VCS information is asynchronously loaded.
 
 
-- <a id="custom-colorschemes">`ZYGAL_COLORSCHEME` (default: `orange`)</a>:  
+- <a id="custom-colorschemes">`ZYGAL_COLORSCHEME`</a> (default: `orange`):  
     The colorscheme zygal will use, either as a name or as a path.  
 
     A name means that the corresponding file in the
