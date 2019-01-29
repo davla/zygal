@@ -32,9 +32,22 @@ with a *z*.
 ![orange prompt](doc/orange-prompt.png)
 
 ## Installation
+#### Dynamic
+Zygal source files can be sourced directly in your `.zshrc`. In this case, you
+can use your favorite package manager to install it. Just remember to define
+the configuration variables *before* the plugin manager loads the plugins.
+
+##### Zgen
+```bash
+zgen load davla/zygal zsh/theme.zsh
+```
+
+##### Zplug
+```bash
+zplug 'davla/zygal', as:theme, use:zsh/theme.zsh
+```
 
 ## Configuration
-
 Configuration is handled via the following variables, that need to be defined
 before the plugin is dynamically loaded. For static code generation, the
 variables need to be defined only when the code is generated.
