@@ -28,10 +28,8 @@ zygal_async_init() {
 }
 
 zygal_async() {
-    local PWD_CMD="cd $PWD"
-
     [ "$ZYGAL_ASYNC" = 'all' ] && {
-        async_worker_eval zygal_worker_vcs_base "$PWD_CMD"
+        async_worker_eval zygal_worker_vcs_base "cd $PWD"
         async_job zygal_worker_vcs_base zygal_vcs_info "$ZYGAL_VCS_FORMAT"
     }
 
@@ -40,10 +38,8 @@ zygal_async() {
 
         async_start_worker "$ZYGAL_WORKER_NAME"
         async_register_callback "$ZYGAL_WORKER_NAME" \
-        zygal_append_vcs_and_stop
-
-        async_worker_eval "$ZYGAL_WORKER_NAME" "$PWD_CMD"
+            zygal_append_vcs_and_stop
         async_job "$ZYGAL_WORKER_NAME" zygal_vcs_info_remote \
-        "$ZYGAL_VCS_FORMAT"
+            "$ZYGAL_VCS_FORMAT"
     }
 }

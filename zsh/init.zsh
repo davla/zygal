@@ -59,10 +59,9 @@ $ZYGAL_ENABLE_VCS_REMOTE && {
     }
 
     echo 'zygal_async() {'
-    PWD_CMD='cd $PWD'
 
     [ "$ZYGAL_ASYNC" = 'all' ] && {
-        echo "\tasync_worker_eval zygal_worker_vcs_base \"$PWD_CMD\""
+        echo '\tasync_worker_eval zygal_worker_vcs_base "cd $PWD"'
         echo -n '\tasync_job zygal_worker_vcs_base zygal_vcs_info '
         echo '"$ZYGAL_VCS_FORMAT"'
     }
@@ -74,7 +73,6 @@ $ZYGAL_ENABLE_VCS_REMOTE && {
         echo '\t\tasync_start_worker "$ZYGAL_WORKER_NAME"'
         echo -n '\t\tasync_register_callback "$ZYGAL_WORKER_NAME" '
         echo 'zygal_append_vcs_and_stop'
-        echo "\t\tasync_worker_eval \"\$ZYGAL_WORKER_NAME\" \"$PWD_CMD\""
         echo '\t\tasync_job "$ZYGAL_WORKER_NAME" zygal_vcs_info_remote \'
         echo '\t\t\t"$ZYGAL_VCS_FORMAT"'
         echo '\t}'
