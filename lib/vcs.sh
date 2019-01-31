@@ -1,12 +1,13 @@
 #!/bin/sh
 
 if [ -n "$BASH_VERSION" ]; then
-    THIS_SCRIPT="${BASH_SOURCES[0]}"
+    THIS_FILE="${BASH_SOURCES[0]}"
 elif [ -n "$ZSH_VERSION" ]; then
-    THIS_SCRIPT="${(%):-%x}"
+    THIS_FILE="${(%):-%x}"
 fi
 
-ZYGAL_THEME_ROOT="$(dirname "$THIS_SCRIPT" | xargs -i readlink -f '{}/..')"
+ZYGAL_THEME_ROOT="$(readlink -f "$THIS_FILE" | xargs dirname | xargs dirname)"
+unset THIS_FILE
 
 source "$ZYGAL_THEME_ROOT/lib/git.sh"
 source "$ZYGAL_THEME_ROOT/lib/hg.sh"

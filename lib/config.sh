@@ -14,13 +14,14 @@ ZYGAL_GIT_PROMPT_PATH="${ZYGAL_GIT_PROMPT_PATH\
 
 [ $ZYGAL_ASYNC != 'none' ] && {
     if [ -n "$BASH_VERSION" ]; then
-        THIS_SCRIPT="${BASH_SOURCES[0]}"
+        THIS_FILE="${BASH_SOURCES[0]}"
     elif [ -n "$ZSH_VERSION" ]; then
-        THIS_SCRIPT="${(%):-%x}"
+        THIS_FILE="${(%):-%x}"
     fi
 
-    ZYGAL_THEME_ROOT="$(dirname "$THIS_SCRIPT" \
-        | xargs -i readlink -f '{}/..')"
+    ZYGAL_THEME_ROOT="$(readlink -f "$THIS_FILE" | xargs dirname \
+        | xargs dirname)"
+    unset THIS_FILE
     ZYGAL_ZSH_ASYNC_PATH="${ZYGAL_ZSH_ASYNC_PATH:-$ZYGAL_THEME_ROOT\
 /deps/zsh-async/async.zsh}"
 

@@ -2,7 +2,9 @@
 
 autoload -Uz add-zsh-hook
 
-ZYGAL_THEME_ROOT=${${(%):-%x}:h:h:P}
+THIS_FILE="$(readlink -f "${(%):-%x}")"
+ZYGAL_THEME_ROOT="${THIS_FILE:h:h}"
+unset THIS_FILE
 
 source "$ZYGAL_THEME_ROOT/lib/config.sh"
 source "$ZYGAL_THEME_ROOT/lib/vcs.sh"

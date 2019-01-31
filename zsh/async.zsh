@@ -1,6 +1,8 @@
 #!/usr/bin/env zsh
 
-ZYGAL_THEME_ROOT=${${(%):-%x}:h:h}
+THIS_FILE="$(readlink -f "${(%):-%x}")"
+ZYGAL_THEME_ROOT="${THIS_FILE:h:h}"
+unset THIS_FILE
 
 source "$ZYGAL_THEME_ROOT/lib/config.sh"
 source "$ZYGAL_ZSH_ASYNC_PATH"
