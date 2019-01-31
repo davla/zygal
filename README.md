@@ -61,7 +61,8 @@ themes for the time being. Thus, you need a little more complex setup to get it
 to work with oh-my-zsh
 ```bash
 # Cloning this repo to oh-my-zsh custom themes directory
-git clone 'https://github.com/davla/zygal' "$ZSH_CUSTOM/themes/zygal"
+# (leave out --recursive if you plan to use ZYGAL_ZSH_ASYNC_PATH)
+git clone --recursive 'https://github.com/davla/zygal' "$ZSH_CUSTOM/themes/zygal"
 
 # Faking the *.zsh-theme file via a symlink
 ln -s "$ZSH_CUSTOM/themes/zygal/zsh/theme.zsh" "$ZSH_CUSTOM/themes/zygal.zsh-theme"
