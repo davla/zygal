@@ -23,6 +23,6 @@ ZYGAL_GIT_PROMPT_PATH="${ZYGAL_GIT_PROMPT_PATH\
         | xargs dirname)"
     unset THIS_FILE
     ZYGAL_ZSH_ASYNC_PATH="${ZYGAL_ZSH_ASYNC_PATH:-$ZYGAL_THEME_ROOT\
-/deps/zsh-async/async.zsh}"
+/deps/zsh-async}"
 
 }

@@ -49,7 +49,7 @@ $ZYGAL_ENABLE_VCS_REMOTE && {
 }
 
 [ "$ZYGAL_ASYNC" != 'none' ] && {
-    echo "source $ZYGAL_ZSH_ASYNC_PATH"
+    echo "source $ZYGAL_ZSH_ASYNC_PATH/async.zsh"
 
     source "$ZYGAL_THEME_ROOT/zsh/async.zsh"
     type -f zygal_append_vcs

@@ -5,7 +5,7 @@ ZYGAL_THEME_ROOT="${THIS_FILE:h:h}"
 unset THIS_FILE
 
 source "$ZYGAL_THEME_ROOT/lib/config.sh"
-source "$ZYGAL_ZSH_ASYNC_PATH"
+source "$ZYGAL_ZSH_ASYNC_PATH/async.zsh"
 
 zygal_append_vcs() {
     [ -n "$3" ] && {
