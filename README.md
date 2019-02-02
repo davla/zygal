@@ -50,6 +50,11 @@ Zygal source files can be sourced directly in your `.zshrc`. In this case, you
 can use your favorite package manager to install it. Just remember to define
 the configuration variables *before* the plugin manager loads the plugins.
 
+##### Antibody
+```bash
+antibody bundle davla/zygal path:zsh/theme.zsh
+```
+
 ##### Antigen
 ```bash
 antigen theme davla/zygal zsh/theme
@@ -70,6 +75,8 @@ ln -s "$ZSH_CUSTOM/themes/zygal/zsh/theme.zsh" "$ZSH_CUSTOM/themes/zygal.zsh-the
 # Updating your .zshrc file to use zygal
 sed -i 's|ZSH_THEME=".*"|ZSH_THEME="zygal"|' "${ZDOTDIR:-$HOME}/.zshrc"
 ```
+<!-- ##### Prezto -->
+
 ##### Zgen
 ```bash
 zgen load davla/zygal zsh/theme.zsh
