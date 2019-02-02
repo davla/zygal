@@ -24,5 +24,12 @@ ZYGAL_GIT_PROMPT_PATH="${ZYGAL_GIT_PROMPT_PATH\
     unset THIS_FILE
     ZYGAL_ZSH_ASYNC_PATH="${ZYGAL_ZSH_ASYNC_PATH:-$ZYGAL_THEME_ROOT\
 /deps/zsh-async}"
-
 }
+
+if [ "$ZYGAL_ASYNC" = 'remote' ] && ! $ZYGAL_ENABLE_VCS_REMOTE; then
+    echo -n >&2 'Remote features disabled (ZYGAL_ENABLE_VCS_REMOTE) but '
+    echo >&2 "ZYGAL_ASYNC set to to 'remote'"
+    false
+else
+    true
+fi
