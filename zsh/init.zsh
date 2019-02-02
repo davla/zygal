@@ -21,9 +21,10 @@ echo '#!/usr/bin/env zsh'
 source "$COLORSCHEME"
 
 ZYGAL_RESET='%f%k'
+ZYGAL_CWD_FORMAT='%3(~.*/%1~.%~)'
 
 echo -n "readonly ZYGAL_PRE_VCS='%F{$ZYGAL_TEXT_COLOR}%K{$ZYGAL_USER_HOST_BG} "
-echo "%n@%M %K{$ZYGAL_CWD_BG} %2(~.*/%1~.%~) $ZYGAL_RESET'"
+echo "%n@%M %K{$ZYGAL_CWD_BG} $ZYGAL_CWD_FORMAT $ZYGAL_RESET'"
 echo -n "readonly ZYGAL_VCS_FORMAT='%%F{$ZYGAL_TEXT_COLOR}%%K{$ZYGAL_VCS_BG} "
 echo "[%s]%s ${ZYGAL_RESET//\%/%%}'"
 echo -n "readonly ZYGAL_POST_VCS=$'\\\\n''%F{$ZYGAL_TEXT_COLOR}"
@@ -87,7 +88,7 @@ $ZYGAL_ENABLE_VCS_REMOTE && {
 echo 'case "$TERM" in'
 echo '\txterm*|rxvt*)'
 echo -n '\t\talias zygal_xterm_title="print -Pn '
-echo "'\\\\033]2;%n@%M %2(~.*/%1~.%~)\\\\007'\""
+echo "'\\\\033]2;%n@%M $ZYGAL_CWD_FORMAT\\\\007'\""
 echo '\t\t;;'
 echo '\t*)'
 echo '\t\talias zygal_xterm_title=true'
