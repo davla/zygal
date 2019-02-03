@@ -68,7 +68,7 @@ with a *z*.
 ![orange prompt](doc/orange-prompt.png)
 
 ## Installation
-#### Dynamic
+#### Dynamic inclusion
 Zygal source files can be sourced directly in your `.zshrc`. In this case, you
 can use your favorite package manager to install it. Just remember to define
 the configuration variables *before* the plugin manager loads the plugins.
@@ -110,6 +110,22 @@ zgen load davla/zygal zsh/theme.zsh
 zplug 'davla/zygal', as:theme, use:zsh/theme.zsh
 ```
 
+##### Manual installation
+Zygal can of course also be installed manually without the aid of any
+framework. You probably don't need instructions in this case, but here they
+are as a confirmation that you're doing everything right
+:stuck_out_tongue:.
+
+Just clone this repository wherever you want, and source `zsh/theme.zsh` in
+your `.zshrc`. Here is just an example:
+```bash
+# Cloning this repo somewhere in your $ZDOTDIR
+# (leave out --recursive if you plan to use ZYGAL_ZSH_ASYNC_PATH)
+git clone --recursive 'https://github.com/davla/zygal' "$ZDOTDIR/themes/zygal"
+
+# Sourcing the main theme file in your .zshrc
+echo 'source $ZDOTDIR/themes/zygal/zsh/theme.zsh' >> "$ZDOTDIR/.zshrc"
+```
 ## Configuration
 Configuration is handled via the following variables, that need to be defined
 before the plugin is dynamically loaded. For static code generation, the
