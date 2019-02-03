@@ -27,10 +27,33 @@ is very spartan, and simply reuses `__git_ps1` with barely noticeable
 adjustments. Git is the only supported VCS so far, but mercurial support is
 coming very soon.
 
+In return, zygal tries to be responsive and efficient. VCS information can
+be retrieved asynchronously, so as not to stand in your way in large
+repositories. You can start typing your command immediately, and the VCS
+segment will appear as soon as it's available, *while* you're typing.
+
+Synchronization with VCS remotes can also be asynchronous, but it would be
+just pointless to check if your co-workers pushed something every time
+you're about to enter a command, wouldn't it? So, zygal will synchronize
+with VCS remotes only every 10 times the prompt is redrawn. Actually, that
+number can be set to whatever you want.
+
+As you can see [below](#configuration), there are some configuration
+options. They might look cool, but they also need to be checked every time
+the prompt is redrawn. This is dumb, as you're very unlikely to change them
+once you set them in your `.zshrc`, and those checks will yield the same
+results every time. This is why zygal can statically generate a script
+meant to be sourced straight away in you `.zshrc`: it contains only the
+code that is *actually* executed with the configuration at generation
+time, so that there's no longer need to check the options. Basically, the
+*content* of the script changes according to the configuration, rather than
+the code that is *executed*. (Btw, don't look at that script. It's
+horrible, no comments and a lot of hardcoding).
+
 **Why background colors?** I prefer colored text on black background myself,
 at least aesthetically. However, have you ever run a very verbose command twice
 in a row? It's always annoying to scroll up and squint to find where the output
-for the second run begins. And sometimes `less` doesn't go well with colored
+of the second run begins. And sometimes `less` doesn't go well with colored
 output, not even with the `-r` option, and then you have to squint at the
 whole output instead of just trying to find where it begins. But if your
 prompt is a blast of colors in your  eyeballs, your life is going to be much
