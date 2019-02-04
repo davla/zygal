@@ -79,8 +79,17 @@ yoke or like the letter H*. It just looks very cool, and plus, it starts
 with a *z*.
 
 ## Colorschemes
+#### Blue
+![blue prompt](doc/blue-prompt.png)
+
+#### Green
+![green prompt](doc/green-prompt.png)
+
 #### Orange
 ![orange prompt](doc/orange-prompt.png)
+
+#### Red
+![red prompt](doc/red-prompt.png)
 
 ## Installation
 ### Dynamic loading
@@ -347,7 +356,6 @@ enabled:
         is being executed).
 
 ## Roadmap
-- More colorschemes.
 - Mercurial support.
 - More hardcoding in generated code.
 - Auto discover git-prompt files.
