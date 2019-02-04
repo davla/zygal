@@ -288,9 +288,68 @@ be set to empty strings, rather than `false`, to be disabled.
     Unlike `__git_ps1` this is displayed also when the only flag is the
     upstream one.
 
+## Environment pollution
+> No sheep had been harmed during the making of this game.  
+>
+> -- <cite>Insomniac Games - Ratchet & Clank 2: Locked and Loaded</cite>
+
+Zygal needs to pollute your global environment with functions and variables
+other than the configuration options. I've taken care of keeping this to a
+minimum, by unsetting variables as soon as possible. In order to avoid name
+clashes, I prefixed everything with `zygal_`, or `ZYGAL_` for variables.
+Furthermore, the [statically generated code](#static-loading) only defines
+the functions and variables necessary for the configuration at generation
+time.
+
+Here, a list of names defined by zygal in the global environment. The
+conditions only apply to static loading, as dynamic sourcing always defines
+all of the names. Names in **bold** are only defined in dynamic loading,
+and so are configuration variables (not listed here).
+
+- Functions:
+    - `zygal_git_prompt_info`
+    - `zygal_hg_prompt_info`
+    - `zygal-theme`             <!-- underscore and dash -->
+    - `zygal_vcs_info`
+- Variables:
+    - **`ZYGAL_CWD_BG`**
+    - **`ZYGAL_CWD_FORMAT`**
+    - `ZYGAL_POST_VCS`          <!-- Hardcode in static -->
+    - `ZYGAL_PRE_VCS`           <!-- Hardcode in static -->
+    - **`ZYGAL_RESET`**
+    - **`ZYGAL_TEXT_COLOR`**
+    - **`ZYGAL_THEME_ROOT`**    <!-- Investigate -->
+    - **`ZYGAL_USER_HOST_BG`**
+    - **`ZYGAL_VCS_BG`**
+    - `ZYGAL_VCS_FORMAT`        <!-- Hardcode in static -->
+
+    <!-- ZYGAL_VCS_REMOTE_SYNC_TRIGGER=10 -->
+
+Only if `ZYGAL_ASYNC` is not `none`:
+- Functions:
+    - `zygal_async`             <!-- Hardcode in static -->
+    - **`zygal_async_init`**
+    - `zygal_append_vcs`
+
+Only if VCS remote synchronization is enabled:
+- Functions:
+    - `zygal_git_sync_remote`
+    - `zygal_vcs_info_remote`
+- variables:
+    - `ZYGAL_VCS_REMOTE_COUNT`
+
+Only if `ZYGAL_ASYNC` is not `none` and VCS remote synchronization is
+enabled:
+- Functions:
+    - `zygal_append_vcs_and_stop`
+- Variables:
+    - `ZYGAL_WORKER_NAME` (only during the time VCS remote synchronization
+        is being executed).
+
 ## Roadmap
 - More colorschemes.
 - Mercurial support.
+- More hardcoding in generated code.
 - Auto discover git-prompt files.
 - Bash port.
 - Integrate with zsh theme mechanism.
