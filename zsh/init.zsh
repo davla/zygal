@@ -2,7 +2,6 @@
 
 THIS_FILE="$(readlink -f "${(%):-%x}")"
 ZYGAL_THEME_ROOT="${THIS_FILE:h:h}"
-unset THIS_FILE
 
 source "$ZYGAL_THEME_ROOT/lib/config.sh"
 [ $? -eq 0 ] && {
@@ -47,7 +46,7 @@ GLOBSEOF
 
     $ZYGAL_ENABLE_VCS_REMOTE && {
         type -f zygal_git_sync_remote
-        # type -f zygal_hg_sync_remote
+        type -f zygal_hg_sync_remote
         type -f zygal_vcs_info_remote
     }
 

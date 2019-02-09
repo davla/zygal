@@ -19,6 +19,7 @@ zygal_vcs_info() {
 
 zygal_vcs_info_remote() {
     zygal_git_sync_remote
+    zygal_hg_sync_remote
 
     zygal_vcs_info "$1"
 }
