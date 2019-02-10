@@ -1,5 +1,9 @@
 #!/bin/sh
 
+#shellcheck disable=2034
+#shellcheck disable=2039
+#shellcheck disable=2154
+
 ZYGAL_ASYNC="${ZYGAL_ASYNC:-remote}"
 ZYGAL_COLORSCHEME=${ZYGAL_COLORSCHEME:-orange}
 
@@ -27,8 +31,8 @@ ZYGAL_GIT_PROMPT_PATH="${ZYGAL_GIT_PROMPT_PATH\
 }
 
 if [ "$ZYGAL_ASYNC" = 'remote' ] && ! $ZYGAL_ENABLE_VCS_REMOTE; then
-    echo -n >&2 'Remote features disabled (ZYGAL_ENABLE_VCS_REMOTE) but '
-    echo >&2 "ZYGAL_ASYNC set to to 'remote'"
+    echo >&2 "Remote features disabled (ZYGAL_ENABLE_VCS_REMOTE) but \
+ZYGAL_ASYNC set to to \"remote\""
     false
 else
     true

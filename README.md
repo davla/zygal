@@ -395,7 +395,6 @@ enabled:
         is being executed).
 
 ## Roadmap
-- Make lib directory portable.
 - Autoload for static code generation.
 - More hardcoding in generated code.
 - Auto discover git-prompt files.
