@@ -37,10 +37,9 @@ Zygal is meant to be a simple and minimal prompt: no eye-candy python
 powerlines, no fancy fonts, just plain Unicode symbols and background colors.
 
 No complex statuses are displayed as well: just *user@host*, the current
-working directory, and VCS information when inside a VCS repository. The latter
-is very spartan, and simply reuses `__git_ps1` with barely noticeable
-adjustments. Git is the only supported VCS so far, but mercurial support is
-coming very soon.
+working directory, and VCS information when inside a VCS repository. VCS
+information is given in a very spartan, colorless `__git_ps1`-like style. Both
+[git](#git-information) and [mercurial](#mercurial-information) are supported.
 
 In return, zygal tries to be responsive and efficient. VCS information can
 be retrieved asynchronously, so as not to stand in your way in large
@@ -204,7 +203,8 @@ variables need to be defined only when the code is generated.
 
 - `ZYGAL_ASYNC` (default: `remote`):  
     What VCS information should be asyncronously loaded:
-    - `all`: Both local and remote VCS information are asynchronously loaded.
+    - <a id="async-all">`all`</a>: Both local and remote VCS information are
+        asynchronously loaded.
     - `remote`: Only remote VCS information is asynchronously loaded, local
         one is not.
     - `none`: no VCS information is asynchronously loaded.
@@ -259,10 +259,10 @@ variables need to be defined only when the code is generated.
     version than the submodule one might break zygal!
 
 ### Git information
-Zygal uses `__git_ps1` under the hood, so its configuration variables are used.
-They can of course be overridden as other zygal configuration variables. You
-can find more information about the available `__git_ps1` configuration
-variables in the [`git-prompt`](https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh)
+Zygal uses `__git_ps1` under the hood, with barely noticeable adjustments. So,
+its configuration variables are used. They can of course be overridden as other
+zygal configuration variables. You can find more information about the
+available `__git_ps1` configuration variables in the [`git-prompt`](https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh)
 file shipped with git itself, in the comments at the beginning of the file.
 Below, the `__git_ps1` variables that are set by zygal to a default value if
 not defined. All the other ones are unset.
@@ -297,6 +297,44 @@ be set to empty strings, rather than `false`, to be disabled.
     Unlike `__git_ps1` this is displayed also when the only flag is the
     upstream one.
 
+### Mercurial information
+Zygal implements mercurial information retrieval from scratch, by running a
+bunch of `hg` subcommands every time the prompt is redrawn in a mercurial
+repository directory. Remote synchronization is implemented by saving the
+changeset in a bundle. As mercurial is on average slower than git, it is highly
+recommended to set `ZYGAL_ASYNC` to [`all`](#async-all) when working in
+mercurial repositories, so as avoid the lag when redrawing the promt. The
+active bookmark is displayed when there is one, otherwise the current branch is
+shown; some status flags are displayed on the side. These are the configuration
+variables, that mirror the ones for git.
+
+- `ZYGAL_HG_BUNDLE` (default: `.hg/changesets.hg`):  
+    The bundle file where remote changesets are stored.
+
+- `ZYGAL_HG_DIRTY` (default: `true`):  
+    Shows the presence of added, modified and removed files (`+`).
+
+- `ZYGAL_HG_MISSING` (default: `true`):  
+    Shows the presence of deleted, but still tracked files (`!`).
+
+- `ZYGAL_HG_REMOTE` (default: `true`):  
+    Shows information about the relative state of the local repository and any
+    of its remote, that is:
+    - `<` when there are changesets in the remote that have not been pulled.
+    - `>` when there are changesets in the remote that have not been pushed.
+    - `=` when the local changesets are even with the remote.
+    - `<>` when there are both non-pushed and non-pulled changesets.
+
+- `ZYGAL_HG_SHELVE` (default: `true`):  
+    Shows the presence of shelves (`$`).
+
+- `ZYGAL_HG_SEPARATOR` (default: ` `):  
+    The separator between the current bookmark name and the mercurial status
+    flags.
+
+- `ZYGAL_HG_UNTRACKED` (default: `true`):  
+    Shows the presence of untracked files (`%`).
+
 ## Environment pollution
 > No sheep had been harmed during the making of this game.  
 >
@@ -312,8 +350,8 @@ time.
 
 Here, a list of names defined by zygal in the global environment. The
 conditions only apply to static loading, as dynamic sourcing always defines
-all of the names. Names in **bold** are only defined in dynamic loading,
-and so are configuration variables (not listed here).
+all of the names. Names in **bold** and configuration variables (not listed
+here) are only defined in dynamic loading.
 
 - Functions:
     - `zygal_git_prompt_info`
@@ -343,6 +381,7 @@ Only if `ZYGAL_ASYNC` is not `none`:
 Only if VCS remote synchronization is enabled:
 - Functions:
     - `zygal_git_sync_remote`
+    - `zygal_hg_sync_remote`
     - `zygal_vcs_info_remote`
 - variables:
     - `ZYGAL_VCS_REMOTE_COUNT`
@@ -356,7 +395,8 @@ enabled:
         is being executed).
 
 ## Roadmap
-- Mercurial support.
+- Make lib directory portable.
+- Autoload for static code generation.
 - More hardcoding in generated code.
 - Auto discover git-prompt files.
 - Bash port.

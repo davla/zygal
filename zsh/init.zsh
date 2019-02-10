@@ -38,6 +38,7 @@ GLOBSEOF
     source "$ZYGAL_THEME_ROOT/lib/vcs.sh"
 
     typeset | grep -P '^GIT_PS1'
+    typeset | grep -P '^ZYGAL_HG'
     echo "type __git_ps1 &> /dev/null || source $ZYGAL_GIT_PROMPT_PATH"
 
     type -f zygal_git_prompt_info
