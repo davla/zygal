@@ -68,7 +68,7 @@ ASYNCEOF
 
         [ "$ZYGAL_ASYNC" = 'all' ] && cat <<ASYNCEOF
     async_worker_eval zygal_worker_vcs_base "cd \$PWD"
-    async_job zygal_worker_vcs_base zygal_vcs_info "$ZYGAL_VCS_FORMAT"
+    async_job zygal_worker_vcs_base zygal_vcs_info "\$ZYGAL_VCS_FORMAT"
 ASYNCEOF
 
         $ZYGAL_ENABLE_VCS_REMOTE && cat <<REMOTEEOF
@@ -107,7 +107,7 @@ REMOTEEOF
     case "$ZYGAL_ASYNC" in
         'all')
             cat <<ASYNCALLEOF
-    PROMPT="\${ZYGAL_PRE_VCS}\${ZYGAL_POST_VCS}"'
+    PROMPT="\${ZYGAL_PRE_VCS}\${ZYGAL_POST_VCS}"
     zygal_async
 ASYNCALLEOF
             ;;
