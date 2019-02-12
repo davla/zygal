@@ -377,6 +377,8 @@ Only if `ZYGAL_ASYNC` is not `none`:
     - `zygal_async`             <!-- Hardcode in static -->
     - **`zygal_async_init`**
     - `zygal_append_vcs`
+- Variables:
+    - `ZYGAL_ASYNC_RUNNING_COUNT`
 
 Only if VCS remote synchronization is enabled:
 - Functions:
@@ -390,9 +392,6 @@ Only if `ZYGAL_ASYNC` is not `none` and VCS remote synchronization is
 enabled:
 - Functions:
     - `zygal_append_vcs_and_stop`
-- Variables:
-    - `ZYGAL_WORKER_NAME` (only during the time VCS remote synchronization
-        is being executed).
 
 ## Roadmap
 - Autoload for static code generation.

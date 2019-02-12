@@ -10,7 +10,8 @@ source "$ZYGAL_THEME_ROOT/lib/config.sh"
 
     [ "$ZYGAL_ASYNC" != 'none' ] && {
         source "$ZYGAL_THEME_ROOT/zsh/async.zsh"
-        zygal_async_init
+        async_init
+        typeset -g ZYGAL_ASYNC_RUNNING_COUNT=0
     }
 
     # Escape sequence to reset all the prompt styles
