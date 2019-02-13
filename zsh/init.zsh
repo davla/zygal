@@ -56,30 +56,46 @@ GLOBSEOF
 
         source "$ZYGAL_THEME_ROOT/zsh/async.zsh"
         type -f zygal_append_vcs
-        $ZYGAL_ENABLE_VCS_REMOTE && type -f zygal_append_vcs_and_stop
-        echo 'async_init'
+        cat <<ASYNCEOF
+async_init
+typeset -g ZYGAL_ASYNC_RUNNING_COUNT=0
 
-        [ "$ZYGAL_ASYNC" = 'all' ] && cat <<ASYNCEOF
-async_start_worker zygal_worker_vcs_base
-async_register_callback zygal_worker_vcs_base zygal_append_vcs
+zygal_async() {
 ASYNCEOF
 
-        echo 'zygal_async() {'
+        case "$ZYGAL_ASYNC" in
+            'all')
+                cat <<ASYNCALLEOF
+    async_start_worker zygal_async_worker
+    async_register_callback zygal_async_worker zygal_append_vcs
 
-        [ "$ZYGAL_ASYNC" = 'all' ] && cat <<ASYNCEOF
-    async_worker_eval zygal_worker_vcs_base "cd \$PWD"
-    async_job zygal_worker_vcs_base zygal_vcs_info "\$ZYGAL_VCS_FORMAT"
-ASYNCEOF
+    ZYGAL_ASYNC_RUNNING_COUNT=\$(( ZYGAL_ASYNC_RUNNING_COUNT + 1 ))
+    async_job zygal_async_worker zygal_vcs_info "\$ZYGAL_VCS_FORMAT"
+ASYNCALLEOF
+                $ZYGAL_ENABLE_VCS_REMOTE && cat <<ASYNCREMOTEEOF
 
-        $ZYGAL_ENABLE_VCS_REMOTE && cat <<REMOTEEOF
     [ "\$ZYGAL_VCS_REMOTE_COUNT" -eq 0 ] && {
-        typeset -g ZYGAL_WORKER_NAME='zygal_worker_vcs_remote'
-        async_start_worker "\$ZYGAL_WORKER_NAME"
-        async_register_callback "\$ZYGAL_WORKER_NAME" zygal_append_vcs_and_stop
-        async_job "\$ZYGAL_WORKER_NAME" zygal_vcs_info_remote \\
+        ZYGAL_ASYNC_RUNNING_COUNT=\$(( ZYGAL_ASYNC_RUNNING_COUNT + 1 ))
+        async_job zygal_async_worker zygal_vcs_info_remote \
             "\$ZYGAL_VCS_FORMAT"
     }
-REMOTEEOF
+ASYNCREMOTEEOF
+                ;;
+
+            'remote')
+                cat <<ASYNCREMOTEEOF
+    [ "\$ZYGAL_VCS_REMOTE_COUNT" -eq 0 ] && {
+        async_start_worker zygal_async_worker
+        async_register_callback zygal_async_worker zygal_append_vcs
+
+        ZYGAL_ASYNC_RUNNING_COUNT=\$(( ZYGAL_ASYNC_RUNNING_COUNT + 1 ))
+        async_job zygal_async_worker zygal_vcs_info_remote \
+            "\$ZYGAL_VCS_FORMAT"
+    }
+ASYNCREMOTEEOF
+                ;;
+        esac
+
         echo '}'
     }
 
@@ -124,8 +140,8 @@ ASYNCREMOTEEOF
             if $ZYGAL_ENABLE_VCS_REMOTE; then
                 cat <<ASYNCNONEEOF
     [ "\$ZYGAL_VCS_REMOTE_COUNT" -eq 0 ] \\
-        && local ZYGAL_VCS="\$(zygal_vcs_info_remote "\$ZYGAL_VCS_FORMAT")" \
-        || local ZYGAL_VCS="$(zygal_vcs_info "\$ZYGAL_VCS_FORMAT")"
+        && local ZYGAL_VCS="\$(zygal_vcs_info_remote "\$ZYGAL_VCS_FORMAT")" \\
+        || local ZYGAL_VCS="\$(zygal_vcs_info "\$ZYGAL_VCS_FORMAT")"
 ASYNCNONEEOF
             else
                 cat <<ASYNCNONEEOF
