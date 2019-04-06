@@ -18,7 +18,7 @@ Asynchronous lightweight prompt for zsh.
     bunch of variables in a file, and you're good to go.
 
 ## Table of contents
-<!-- TOC START min:2 max:3 link:true update:false -->
+<!-- TOC START min:2 max:3 link:true asterisk:false update:false -->
 - [Features](#features)
 - [Description](#description)
 - [Colorschemes](#colorschemes)
@@ -27,9 +27,9 @@ Asynchronous lightweight prompt for zsh.
     - [Static loading](#static-loading)
 - [Configuration](#configuration)
     - [Git information](#git-information)
+    - [Mercurial information](#mercurial-information)
 - [Environment pollution](#environment-pollution)
 - [Roadmap](#roadmap)
-
 <!-- TOC END -->
 
 ## Description
@@ -133,7 +133,7 @@ zgen load davla/zygal zsh/theme.zsh
 zplug 'davla/zygal', as:theme, use:zsh/theme.zsh
 ```
 
-#### Manual installation
+#### <a id="manual-install">Manual installation</a>
 Zygal can of course also be installed manually without the aid of any
 framework. You probably don't need instructions in this case, but here they
 are as a confirmation that you're doing everything right
@@ -157,34 +157,32 @@ configuration options every time the prompt is redrawn. This file is meant
 to be sourced in your `.zshrc` and it contains all the zygal code you need,
 except for the external resources, namely the
 [zsh-async](https://github.com/mafredri/zsh-async) library and the
-[`git-prompt`](https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh) script. Since the configuration is effectively "hardcoded"
-in this file, it needs to be re-generated anytime you want to
-change the configuration options.
+[`git-prompt`](https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh)
+script. Since the configuration is effectively "hardcoded" in this file, it
+needs to be re-generated every time you want to change the configuration
+options.
 
-In order to generate the file, you need to clone this repo somewhere and
-then run the script `zsh/init.zsh`: it uses the configuration variables in
-the context it is run in, and outputs to STDOUT. This is the recommended
-usage:
+<a id="static-autoload"></a>
+In order to generate the file, you need to run the script `zsh/zygal-static`:
+it uses the configuration variables in the context it is run in, and outputs to
+STDOUT. The script can be either run directly, or as an autoloaded function:
+This is the recommended usage (assuming the script is autoloaded):
 
 ```bash
-# Cloning this repo anywhere
-# (leave out --recursive if you plan to use ZYGAL_ZSH_ASYNC_PATH)
-git clone --recursive 'https://github.com/davla/zygal' "$HOME"
-
 # Defining the configuration options BEFORE generating the script.
 export ZYGAL_COLORSCHEME='blue'
 
 # Writing the generated script to a file
-zsh "$HOME/zygal/zsh/init.zsh" > "$ZDOTDIR/themes/zygal-cache.zsh"
+zygal-static > "$ZDOTDIR/themes/zygal-cache.zsh"
 
 # Sourcing the file somewhere in .zshrc
 echo 'source $ZDOTDIR/themes/zygal-cache.zsh' >> "$ZDOTDIR/.zshrc"
 ```
 
-The content of the static file can also be generated and sourced on the fly
-in `.zshrc`, but this will probably not pay off, as the code generation is
-definitely not optimized for efficiency. I have no intentions to do so, as
-in my opinion this defeats the purpose of static code generation.
+The content of the static file can also be generated and sourced on the fly in
+`.zshrc`, but this will probably not pay off, as the code generation is
+definitely not optimized for efficiency. I have no intentions to do so, as in
+my opinion this defeats the purpose of static code generation.
 
 ```bash
 # $ZDOTDIR/.zshrc
@@ -193,8 +191,75 @@ in my opinion this defeats the purpose of static code generation.
 ZYGAL_COLORSCHEME='blue'
 
 # Generating and sourcing the static script via process substitution.
-source <(zsh "$HOME/zygal/zsh/init.zsh")
+source <(zygal-static)
 ```
+
+Below, how to autoload static script gneration with the most common zsh plugin
+managers.
+
+#### Antibody
+```bash
+antibody bundle davla/zygal path:zsh/autoload.zsh
+```
+
+#### Antigen
+```bash
+antigen bundle davla/zygal zsh/autoload
+```
+
+#### Oh-my-zsh
+The theme is not available in robbyrussell's repo, as they're not accepting new
+themes for the time being. Thus, you need a little more complex setup to get it
+to work with oh-my-zsh
+```bash
+# Cloning this repo to oh-my-zsh custom themes directory
+# (leave out --recursive if you plan to use ZYGAL_ZSH_ASYNC_PATH)
+git clone --recursive 'https://github.com/davla/zygal' "$ZSH_CUSTOM/themes/zygal"
+
+# Faking the *.zsh-theme file via a symlink
+ln -s "$ZSH_CUSTOM/themes/zygal/zsh/theme.zsh" "$ZSH_CUSTOM/themes/zygal.zsh-theme"
+
+# Updating your .zshrc file to use zygal
+sed -i 's|ZSH_THEME=".*"|ZSH_THEME="zygal"|' "${ZDOTDIR:-$HOME}/.zshrc"
+```
+<!-- ##### Prezto -->
+
+#### Zgen
+```bash
+zgen load davla/zygal zsh/autoload.zsh
+```
+
+#### Zplug
+```bash
+zplug 'davla/zygal', use:zsh/autoload.zsh
+```
+
+#### Manual installation
+Well, this is pretty much the same as
+[zygal manual installation](#manual-install): you just need to change the
+loaded source from `theme.zsh` to `autoload.zsh` :stuck_out_tongue:, this
+way:
+
+```bash
+# Cloning this repo somewhere in your $ZDOTDIR
+# (leave out --recursive if you plan to use ZYGAL_ZSH_ASYNC_PATH)
+git clone --recursive 'https://github.com/davla/zygal' "$ZDOTDIR/themes/zygal"
+
+# Sourcing the autoload file somewhere in .zshrc
+echo 'source $ZDOTDIR/themes/zygal/zsh/autoload.zsh' >> "$ZDOTDIR/.zshrc"
+```
+
+#### No autoload
+
+Well, if you are really doing this, chances are high that you know exactly what
+to do, so here it is the confirmation you're looking for: zygal static code
+generation works also just by running the `zsh/zygal-static` script.
+
+The best approach to run the script without autoload is to clone this
+repository somewhere manually, so that you know exactly where it is. You can
+still use a zsh package manager if you want to, you just need to know where it
+keeps its packages. If you want an example, just replace `zygal-static` with
+the full path to the script in [the examples with autoload](#static-autoload)
 
 ## Configuration
 Configuration is handled via the following variables, that need to be defined
