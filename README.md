@@ -422,25 +422,23 @@ here) are only defined in dynamic loading.
 - Functions:
     - `zygal_git_prompt_info`
     - `zygal_hg_prompt_info`
-    - `zygal-theme`             <!-- underscore and dash -->
+    - `zygal-theme`
     - `zygal_vcs_info`
 - Variables:
     - **`ZYGAL_CWD_BG`**
     - **`ZYGAL_CWD_FORMAT`**
-    - `ZYGAL_POST_VCS`          <!-- Hardcode in static -->
-    - `ZYGAL_PRE_VCS`           <!-- Hardcode in static -->
+    - `ZYGAL_POST_VCS`          <!-- Try to hardcode in static -->
+    - `ZYGAL_PRE_VCS`           <!-- Try to hardcode in static -->
     - **`ZYGAL_RESET`**
     - **`ZYGAL_TEXT_COLOR`**
     - **`ZYGAL_THEME_ROOT`**
     - **`ZYGAL_USER_HOST_BG`**
     - **`ZYGAL_VCS_BG`**
-    - `ZYGAL_VCS_FORMAT`        <!-- Hardcode in static -->
-
-    <!-- ZYGAL_VCS_REMOTE_SYNC_TRIGGER=10 -->
+    - `ZYGAL_VCS_FORMAT`        <!-- Try to ardcode in static -->
 
 Only if `ZYGAL_ASYNC` is not `none`:
 - Functions:
-    - `zygal_async`             <!-- Hardcode in static -->
+    - `zygal_async`
     - `zygal_append_vcs`
 - Variables:
     - `ZYGAL_ASYNC_RUNNING_COUNT`

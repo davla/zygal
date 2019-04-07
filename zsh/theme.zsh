@@ -21,7 +21,7 @@ source "$ZYGAL_THEME_ROOT/lib/config.sh"
 
     PROMPT_SUBST=true
 
-    zygal_theme() {
+    zygal-theme() {
         # If this is an xterm set the title to user@host:dir
         case "$TERM" in
             xterm*|rxvt*)
@@ -45,7 +45,7 @@ source "$ZYGAL_THEME_ROOT/lib/config.sh"
 
         $ZYGAL_ENABLE_VCS_REMOTE \
             && ZYGAL_VCS_REMOTE_COUNT=$(( (ZYGAL_VCS_REMOTE_COUNT + 1) \
-                % ZYGAL_VCS_REMOTE_SYNC_TRIGGER ))
+                % ZYGAL_VCS_REMOTE_REFRESH_COUNT ))
 
         case "$ZYGAL_ASYNC" in
             'all')
@@ -73,7 +73,7 @@ source "$ZYGAL_THEME_ROOT/lib/config.sh"
         }
 
         autoload -Uz add-zsh-hook
-        add-zsh-hook precmd zygal_theme
+        add-zsh-hook precmd zygal-theme
 }
 
 unset THIS_FILE
