@@ -208,9 +208,13 @@ antigen bundle davla/zygal
 ```
 
 #### Oh-my-zsh
-The theme is not available in robbyrussell's repo, as they're not accepting new
-themes for the time being. Thus, you need a little more complex setup to get it
-to work with oh-my-zsh
+Zygal is not available in robbyrussell's repo, since they don't accept new
+themes right now. Even though the autoload functionalities are added as a
+plugin, there's no point in having zygal added as a plugin when it's actually
+a theme. So, you need to add it as a custom plugin: this is actually as simple
+as cloning zygal in the right directory and adding it to the plugin list, this
+way:
+
 ```bash
 # Cloning this repo to oh-my-zsh custom themes directory
 # (leave out --recursive if you plan to use ZYGAL_ZSH_ASYNC_PATH)
