@@ -2,14 +2,15 @@
 
 THIS_FILE="$(readlink -f "${(%):-%x}")"
 ZYGAL_THEME_ROOT="${THIS_FILE:h:h}"
-unset THIS_FILE
 
 source "$ZYGAL_THEME_ROOT/lib/config.sh"
+
 [ $? -eq 0 ] && {
     source "$ZYGAL_THEME_ROOT/lib/vcs.sh"
 
     [ "$ZYGAL_ASYNC" != 'none' ] && {
         source "$ZYGAL_THEME_ROOT/zsh/async.zsh"
+
         async_init
         typeset -g ZYGAL_ASYNC_RUNNING_COUNT=0
     }
@@ -74,3 +75,5 @@ source "$ZYGAL_THEME_ROOT/lib/config.sh"
         autoload -Uz add-zsh-hook
         add-zsh-hook precmd zygal_theme
 }
+
+unset THIS_FILE

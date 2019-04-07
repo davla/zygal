@@ -1,10 +1,15 @@
 #!/usr/bin/env zsh
 
-THIS_FILE="$(readlink -f "${(%):-%x}")"
-ZYGAL_THEME_ROOT="${THIS_FILE:h:h}"
-unset THIS_FILE
+[ -n "$ZYGAL_THEME_ROOT" ] && ROOT_DEFINED=true || ROOT_DEFINED=false
+$ROOT_DEFINED || {
+    THIS_FILE="$(readlink -f "${(%):-%x}")"
+    ZYGAL_THEME_ROOT="${THIS_FILE:h:h}"
+    unset THIS_FILE
+}
 
 source "$ZYGAL_THEME_ROOT/lib/config.sh"
+source "$ZYGAL_THEME_ROOT/lib/vcs.sh"
+
 [ $? -eq 0 ] && {
     source "$ZYGAL_ZSH_ASYNC_PATH/async.zsh"
 
@@ -37,3 +42,6 @@ source "$ZYGAL_THEME_ROOT/lib/config.sh"
         }
     }
 }
+
+$ROOT_DEFINED || unset ZYGAL_THEME_ROOT
+unset ROOT_DEFINED

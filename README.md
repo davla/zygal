@@ -431,7 +431,7 @@ here) are only defined in dynamic loading.
     - `ZYGAL_PRE_VCS`           <!-- Hardcode in static -->
     - **`ZYGAL_RESET`**
     - **`ZYGAL_TEXT_COLOR`**
-    - **`ZYGAL_THEME_ROOT`**    <!-- Investigate -->
+    - **`ZYGAL_THEME_ROOT`**
     - **`ZYGAL_USER_HOST_BG`**
     - **`ZYGAL_VCS_BG`**
     - `ZYGAL_VCS_FORMAT`        <!-- Hardcode in static -->
@@ -454,8 +454,8 @@ Only if VCS remote synchronization is enabled:
     - `ZYGAL_VCS_REMOTE_COUNT`
 
 ## Roadmap
-- Autoload for static code generation.
 - More hardcoding in generated code.
 - Auto discover git-prompt files.
 - Bash port.
 - Integrate with zsh theme mechanism.
+- Less environment pollution by using top-level functions
