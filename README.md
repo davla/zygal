@@ -103,7 +103,7 @@ antibody bundle davla/zygal path:zsh/theme.zsh
 
 #### Antigen
 ```bash
-antigen theme davla/zygal zsh/theme
+antigen theme davla/zygal
 ```
 
 #### Oh-my-zsh
@@ -204,7 +204,7 @@ antibody bundle davla/zygal path:zsh/autoload.zsh
 
 #### Antigen
 ```bash
-antigen bundle davla/zygal zsh/autoload
+antigen bundle davla/zygal
 ```
 
 #### Oh-my-zsh
