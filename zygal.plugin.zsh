@@ -1,1 +1,1 @@
-./zsh/autoload.sh
+./zsh/autoload.zsh
