@@ -214,13 +214,10 @@ to work with oh-my-zsh
 ```bash
 # Cloning this repo to oh-my-zsh custom themes directory
 # (leave out --recursive if you plan to use ZYGAL_ZSH_ASYNC_PATH)
-git clone --recursive 'https://github.com/davla/zygal' "$ZSH_CUSTOM/themes/zygal"
-
-# Faking the *.zsh-theme file via a symlink
-ln -s "$ZSH_CUSTOM/themes/zygal/zsh/theme.zsh" "$ZSH_CUSTOM/themes/zygal.zsh-theme"
+git clone --recursive 'https://github.com/davla/zygal' "$ZSH_CUSTOM/plugins/zygal"
 
 # Updating your .zshrc file to use zygal
-sed -i 's|ZSH_THEME=".*"|ZSH_THEME="zygal"|' "${ZDOTDIR:-$HOME}/.zshrc"
+sed -i 's|plugins=(|plugins=(zygal |' "${ZDOTDIR:-$HOME}/.zshrc"
 ```
 <!-- ##### Prezto -->
 
