@@ -427,18 +427,18 @@ here) are only defined in dynamic loading.
 - Variables:
     - **`ZYGAL_CWD_BG`**
     - **`ZYGAL_CWD_FORMAT`**
-    - `ZYGAL_POST_VCS`          <!-- Try to hardcode in static -->
-    - `ZYGAL_PRE_VCS`           <!-- Try to hardcode in static -->
+    - `ZYGAL_POST_VCS`
+    - `ZYGAL_PRE_VCS`
     - **`ZYGAL_RESET`**
     - **`ZYGAL_TEXT_COLOR`**
     - **`ZYGAL_THEME_ROOT`**
     - **`ZYGAL_USER_HOST_BG`**
     - **`ZYGAL_VCS_BG`**
-    - `ZYGAL_VCS_FORMAT`        <!-- Try to ardcode in static -->
+    - `ZYGAL_VCS_FORMAT`
 
 Only if `ZYGAL_ASYNC` is not `none`:
 - Functions:
-    - `zygal_async`
+    - **`zygal_async`**
     - `zygal_append_vcs`
 - Variables:
     - `ZYGAL_ASYNC_RUNNING_COUNT`
@@ -452,7 +452,6 @@ Only if VCS remote synchronization is enabled:
     - `ZYGAL_VCS_REMOTE_COUNT`
 
 ## Roadmap
-- More hardcoding in generated code.
 - Auto discover git-prompt files.
 - Bash port.
 - Integrate with zsh theme mechanism.
