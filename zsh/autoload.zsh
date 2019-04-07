@@ -6,3 +6,5 @@ unset THIS_FILE
 
 fpath=("$ZYGAL_THEME_ROOT/zsh" $fpath)
 autoload -Uz zygal-static
+
+unset ZYGAL_THEME_ROOT
