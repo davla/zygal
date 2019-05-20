@@ -10,5 +10,5 @@ $ROOT_DEFINED || {
 fpath=("$ZYGAL_THEME_ROOT/zsh" $fpath)
 autoload -Uz zygal-static
 
-ROOT_DEFINED || unset ZYGAL_THEME_ROOT
+$ROOT_DEFINED || unset ZYGAL_THEME_ROOT
 unset ROOT_DEFINED
