@@ -13,8 +13,28 @@ $ZYGAL_ENABLE_VCS_REMOTE && {
     ZYGAL_VCS_REMOTE_COUNT=-1
 }
 
-ZYGAL_GIT_PROMPT_PATH="${ZYGAL_GIT_PROMPT_PATH\
-:-/usr/lib/git-core/git-sh-prompt}"
+[ -z "$ZYGAL_GIT_PROMPT_PATH" ] && {
+    ZYGAL_GIT_PROMPT_FILES='/usr/lib/git-core/git-sh-prompt
+/usr/share/git/completion/git-prompt.sh'
+
+    TMP_FILE="$(mktemp)"
+    echo "$ZYGAL_GIT_PROMPT_FILES" > "$TMP_FILE"
+
+    while read ZYGAL_GIT_PROMPT_FILE; do
+        if [ -f "$ZYGAL_GIT_PROMPT_FILE" ]; then
+            ZYGAL_GIT_PROMPT_PATH="$ZYGAL_GIT_PROMPT_FILE"
+            break
+        fi
+    done < "$TMP_FILE"
+
+    rm "$TMP_FILE"
+    unset ZYGAL_GIT_PROMPT_FILES ZYGAL_GIT_PROMPT_FILES
+}
+[ -z "$ZYGAL_GIT_PROMPT_PATH" ] && {
+    printf >&2 'No git prompt file found to source. Make sure you defined '
+    echo >&2 'ZYGAL_GIT_PROMPT_PATH'
+    exit
+}
 
 [ $ZYGAL_ASYNC != 'none' ] && {
     [ -n "$ZYGAL_THEME_ROOT" ] && ROOT_DEFINED=true || ROOT_DEFINED=false

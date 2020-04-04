@@ -452,7 +452,7 @@ Only if VCS remote synchronization is enabled:
     - `ZYGAL_VCS_REMOTE_COUNT`
 
 ## Roadmap
-- Auto discover git-prompt files.
+- Prettify auto discover git-prompt files.
 - Bash port.
 - Integrate with zsh theme mechanism.
 - Less environment pollution by using top-level functions
