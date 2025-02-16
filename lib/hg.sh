@@ -42,7 +42,7 @@ ${ZYGAL_HG_PROMPT_SHELVES}\
 ${ZYGAL_HG_PROMPT_UNTRACKED}\
 ${ZYGAL_HG_PROMPT_MISSING}\
 ${ZYGAL_HG_PROMPT_REMOTE}')}" \
-        | xargs -i printf "$1" '{}' ' hg'
+        | xargs -I '{}' printf "$1" '{}' ' hg'
 
     unset ZYGAL_HG_PROMPT_STATUS ZYGAL_HG_PROMPT_DIRTY
     unset ZYGAL_HG_PROMPT_UNTRACKED ZYGAL_HG_PROMPT_MISSING

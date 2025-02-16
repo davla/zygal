@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 
 [ -n "$ZYGAL_THEME_ROOT" ] && ROOT_DEFINED=true || ROOT_DEFINED=false
-$ROOT_DEFINED || {
+[ "$ROOT_DEFINED" = 'true' ] || {
     THIS_FILE="$(readlink -f "${(%):-%x}")"
     ZYGAL_THEME_ROOT="${THIS_FILE:h:h}"
     unset THIS_FILE

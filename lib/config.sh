@@ -20,7 +20,7 @@ $ZYGAL_ENABLE_VCS_REMOTE && {
     TMP_FILE="$(mktemp)"
     echo "$ZYGAL_GIT_PROMPT_FILES" > "$TMP_FILE"
 
-    while read ZYGAL_GIT_PROMPT_FILE; do
+    while read -r ZYGAL_GIT_PROMPT_FILE; do
         if [ -f "$ZYGAL_GIT_PROMPT_FILE" ]; then
             ZYGAL_GIT_PROMPT_PATH="$ZYGAL_GIT_PROMPT_FILE"
             break
@@ -36,7 +36,7 @@ $ZYGAL_ENABLE_VCS_REMOTE && {
     exit
 }
 
-[ $ZYGAL_ASYNC != 'none' ] && {
+[ "$ZYGAL_ASYNC" != 'none' ] && {
     [ -n "$ZYGAL_THEME_ROOT" ] && ROOT_DEFINED=true || ROOT_DEFINED=false
     $ROOT_DEFINED || {
         if [ -n "$BASH_VERSION" ]; then
