@@ -28,8 +28,8 @@ zygal_git_prompt_info() {
     [ -n "$ZYGAL_GIT_PROMPT_BRANCH" ] \
         && [ "$ZYGAL_GIT_PROMPT_INFO" != "$ZYGAL_GIT_PROMPT_BRANCH" ] \
         && ZYGAL_GIT_PROMPT_INFO="$(echo "$ZYGAL_GIT_PROMPT_INFO" \
-            | sed 's/|/\|/g' \
-            | sed -E "s|$ZYGAL_GIT_PROMPT_BRANCH\
+            | sed --regexp-extended 's#\|#\|#g' \
+            | sed --regexp-extended "s|$ZYGAL_GIT_PROMPT_BRANCH\
 ($GIT_PS1_STATESEPARATOR)*|${ZYGAL_GIT_PROMPT_BRANCH}\
 ${GIT_PS1_STATESEPARATOR}|")"
 
