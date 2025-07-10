@@ -43,10 +43,6 @@ source "$ZYGAL_THEME_ROOT/lib/config.sh"
         typeset -g ZYGAL_VCS_FORMAT="%%F{$ZYGAL_TEXT_COLOR}\
 %%K{$ZYGAL_VCS_BG} [%s]%s ${ZYGAL_RESET//\%/%%}"
 
-        $ZYGAL_ENABLE_VCS_REMOTE \
-            && ZYGAL_VCS_REMOTE_COUNT=$(( (ZYGAL_VCS_REMOTE_COUNT + 1) \
-                % ZYGAL_VCS_REMOTE_REFRESH_COUNT ))
-
         case "$ZYGAL_ASYNC" in
             'all')
                 PROMPT="${ZYGAL_PRE_VCS}${ZYGAL_POST_VCS}"
@@ -60,13 +56,7 @@ source "$ZYGAL_THEME_ROOT/lib/config.sh"
                 ;;
 
             'none')
-                if $ZYGAL_ENABLE_VCS_REMOTE \
-                    && [ "$ZYGAL_VCS_REMOTE_COUNT" -eq 0 ]; then
-                    local ZYGAL_VCS="$(zygal_vcs_info_remote \
-                        "$ZYGAL_VCS_FORMAT")"
-                else
-                    local ZYGAL_VCS="$(zygal_vcs_info "$ZYGAL_VCS_FORMAT")"
-                fi
+                local ZYGAL_VCS="$(zygal_vcs_info "$ZYGAL_VCS_FORMAT")"
                 PROMPT="${ZYGAL_PRE_VCS}${ZYGAL_VCS}${ZYGAL_POST_VCS}"
                 ;;
             esac

@@ -24,12 +24,5 @@ zygal_vcs_info() {
     zygal_hg_prompt_info "$1"
 }
 
-zygal_vcs_info_remote() {
-    zygal_git_sync_remote
-    zygal_hg_sync_remote
-
-    zygal_vcs_info "$1"
-}
-
 $ROOT_DEFINED || unset ZYGAL_THEME_ROOT
 unset ROOT_DEFINED

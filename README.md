@@ -8,8 +8,6 @@ Asynchronous lightweight prompt for zsh.
     require no third-party tools setup.
 - **Asynchronous**: you shouldn't wait to type in your terminal: those VCS
     symbols you've just seen three seconds ago should wait instead.
-- **VCS remote sync**: it's nice to automatically synchronize your local
-    repository with the remote one, at least every now and then.
 - **Static code generation**: why should your shell execute logic every time
     it draws the prompt, if you set the configuration variables only in
     your `.zshrc`?
@@ -46,12 +44,6 @@ be retrieved asynchronously, so as not to stand in your way in large
 repositories. You can start typing your command immediately, and the VCS
 segment will appear as soon as it's available, *while* you're typing.
 
-Synchronization with VCS remotes can also be asynchronous, but it would be
-just pointless to check if your co-workers pushed something every time
-you're about to enter a command, wouldn't it? So, zygal will synchronize
-with VCS remotes only every 10 times the prompt is redrawn. Actually, that
-number can be set to whatever you want.
-
 As you can see [below](#configuration), there are some configuration
 options. They might look cool, but they also need to be checked every time
 the prompt is redrawn. This is dumb, as you're very unlikely to change them
@@ -70,7 +62,7 @@ in a row? It's always annoying to scroll up and squint to find where the output
 of the second run begins. And sometimes `less` doesn't go well with colored
 output, not even with the `-r` option, and then you have to squint at the
 whole output instead of just trying to find where it begins. But if your
-prompt is a blast of colors in your  eyeballs, your life is going to be much
+prompt is a blast of colors in your eyeballs, your life is going to be much
 easier!
 
 **Why *zygal*?** Well, the dictionary says it means *Having a shape like a
@@ -194,7 +186,7 @@ ZYGAL_COLORSCHEME='blue'
 source <(zygal-static)
 ```
 
-Below, how to autoload static script gneration with the most common zsh plugin
+Below, how to autoload static script generation with the most common zsh plugin
 managers.
 
 #### Antibody
@@ -293,18 +285,9 @@ variables need to be defined only when the code is generated.
         small part on a new line.
 
 
-- `ZYGAL_ENABLE_VCS_REMOTE` (default `true`):  
-    Whether VCS remote sync features should be enabled at all.
-
-
 - `ZYGAL_GIT_PROMPT_PATH` (default `/usr/lib/git-core/git-sh-prompt`):  
     The path to the file defining `__git_ps1`. This is the default location
     on Debian systems, so you might need to specify a different one.
-
-
-- `ZYGAL_VCS_REMOTE_REFRESH_COUNT` (default `10`):  
-    The number of prompt refresh that will trigger VCS remote sync.
-    Unset if `ZYGAL_ENABLE_VCS_REMOTE` is `false`.
 
 
 - `ZYGAL_ZSH_ASYNC_PATH` (default: `<zygal_root>/deps/zsh-async`):  
@@ -442,14 +425,6 @@ Only if `ZYGAL_ASYNC` is not `none`:
     - `zygal_append_vcs`
 - Variables:
     - `ZYGAL_ASYNC_RUNNING_COUNT`
-
-Only if VCS remote synchronization is enabled:
-- Functions:
-    - `zygal_git_sync_remote`
-    - `zygal_hg_sync_remote`
-    - `zygal_vcs_info_remote`
-- variables:
-    - `ZYGAL_VCS_REMOTE_COUNT`
 
 ## Roadmap
 - Prettify auto discover git-prompt files.

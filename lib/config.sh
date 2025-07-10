@@ -7,12 +7,6 @@
 ZYGAL_ASYNC="${ZYGAL_ASYNC:-remote}"
 ZYGAL_COLORSCHEME=${ZYGAL_COLORSCHEME:-orange}
 
-ZYGAL_ENABLE_VCS_REMOTE="${ZYGAL_ENABLE_VCS_REMOTE-true}"
-$ZYGAL_ENABLE_VCS_REMOTE && {
-    ZYGAL_VCS_REMOTE_REFRESH_COUNT="${ZYGAL_VCS_REMOTE_REFRESH_COUNT:-10}"
-    ZYGAL_VCS_REMOTE_COUNT=-1
-}
-
 [ -z "$ZYGAL_GIT_PROMPT_PATH" ] && {
     ZYGAL_GIT_PROMPT_FILES='/usr/lib/git-core/git-sh-prompt
 /usr/share/git/completion/git-prompt.sh'
@@ -55,11 +49,3 @@ $ZYGAL_ENABLE_VCS_REMOTE && {
     $ROOT_DEFINED || unset ZYGAL_THEME_ROOT
     unset ROOT_DEFINED
 }
-
-if [ "$ZYGAL_ASYNC" = 'remote' ] && ! $ZYGAL_ENABLE_VCS_REMOTE; then
-    echo >&2 "Remote features disabled (ZYGAL_ENABLE_VCS_REMOTE) but \
-ZYGAL_ASYNC set to to \"remote\""
-    false
-else
-    true
-fi

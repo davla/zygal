@@ -37,7 +37,3 @@ ${GIT_PS1_STATESEPARATOR}|")"
 
     unset ZYGAL_GIT_PROMPT_INFO ZYGAL_GIT_PROMPT_BRANCH
 }
-
-zygal_git_sync_remote() {
-    git status > /dev/null 2>&1 && git fetch
-}

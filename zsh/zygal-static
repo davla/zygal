@@ -45,12 +45,6 @@ GLOBSEOF
     type -f zygal_hg_prompt_info
     type -f zygal_vcs_info
 
-    $ZYGAL_ENABLE_VCS_REMOTE && {
-        type -f zygal_git_sync_remote
-        type -f zygal_hg_sync_remote
-        type -f zygal_vcs_info_remote
-    }
-
     [ "$ZYGAL_ASYNC" != 'none' ] && {
         echo "source $ZYGAL_ZSH_ASYNC_PATH/async.zsh"
 
@@ -76,11 +70,6 @@ zygal-theme() {
     zygal_xterm_title
 THEMEEOF
 
-    $ZYGAL_ENABLE_VCS_REMOTE && cat <<REMOTEEOF
-    ZYGAL_VCS_REMOTE_COUNT=\$(( (ZYGAL_VCS_REMOTE_COUNT + 1) % \
-$ZYGAL_VCS_REMOTE_REFRESH_COUNT ))
-REMOTEEOF
-
     case "$ZYGAL_ASYNC" in
         'all')
             cat <<ASYNCALLEOF
@@ -90,40 +79,19 @@ REMOTEEOF
     ZYGAL_ASYNC_RUNNING_COUNT=\$(( ZYGAL_ASYNC_RUNNING_COUNT + 1 ))
     async_job zygal_async_worker zygal_vcs_info "\$ZYGAL_VCS_FORMAT"
 ASYNCALLEOF
-            $ZYGAL_ENABLE_VCS_REMOTE && cat <<ASYNCREMOTEEOF
-    [ "\$ZYGAL_VCS_REMOTE_COUNT" -eq 0 ] && {
-        ZYGAL_ASYNC_RUNNING_COUNT=\$(( ZYGAL_ASYNC_RUNNING_COUNT + 1 ))
-        async_job zygal_async_worker zygal_vcs_info_remote "\$ZYGAL_VCS_FORMAT"
-    }
-ASYNCREMOTEEOF
             ;;
 
         'remote')
             cat <<ASYNCREMOTEEOF
     local ZYGAL_VCS="\$(zygal_vcs_info "\$ZYGAL_VCS_FORMAT")"
     PROMPT="\${ZYGAL_PRE_VCS}\${ZYGAL_VCS}\${ZYGAL_POST_VCS}"
-    [ "\$ZYGAL_VCS_REMOTE_COUNT" -eq 0 ] && {
-        async_start_worker zygal_async_worker
-        async_register_callback zygal_async_worker zygal_append_vcs
-
-        ZYGAL_ASYNC_RUNNING_COUNT=\$(( ZYGAL_ASYNC_RUNNING_COUNT + 1 ))
-        async_job zygal_async_worker zygal_vcs_info_remote "\$ZYGAL_VCS_FORMAT"
-    }
 ASYNCREMOTEEOF
             ;;
 
         'none')
-            if $ZYGAL_ENABLE_VCS_REMOTE; then
-                cat <<ASYNCNONEEOF
-    [ "\$ZYGAL_VCS_REMOTE_COUNT" -eq 0 ] \\
-        && local ZYGAL_VCS="\$(zygal_vcs_info_remote "\$ZYGAL_VCS_FORMAT")" \\
-        || local ZYGAL_VCS="\$(zygal_vcs_info "\$ZYGAL_VCS_FORMAT")"
-ASYNCNONEEOF
-            else
                 cat <<ASYNCNONEEOF
     local ZYGAL_VCS="\$(zygal_vcs_info "$ZYGAL_VCS_FORMAT")"
 ASYNCNONEEOF
-            fi
             echo '\tPROMPT="${ZYGAL_PRE_VCS}${ZYGAL_VCS}${ZYGAL_POST_VCS}"'
             ;;
     esac

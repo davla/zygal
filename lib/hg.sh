@@ -48,7 +48,3 @@ ${ZYGAL_HG_PROMPT_REMOTE}')}" \
     unset ZYGAL_HG_PROMPT_UNTRACKED ZYGAL_HG_PROMPT_MISSING
     unset ZYGAL_HG_PROMPT_SHELVES ZYGAL_HG_PROMPT_REMOTE
 }
-
-zygal_hg_sync_remote() {
-    hg incoming --bundle "$ZYGAL_HG_BUNDLE" > /dev/null 2>&1
-}

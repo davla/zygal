@@ -25,7 +25,7 @@ source "$ZYGAL_THEME_ROOT/lib/vcs.sh"
     }
 
     zygal_async() {
-        [ "$ZYGAL_ASYNC" = 'all' ] || [ "$ZYGAL_VCS_REMOTE_COUNT" -eq 0 ] && {
+        [ "$ZYGAL_ASYNC" = 'all' ] && {
             async_start_worker zygal_async_worker
             async_register_callback zygal_async_worker zygal_append_vcs
         }
@@ -33,12 +33,6 @@ source "$ZYGAL_THEME_ROOT/lib/vcs.sh"
         [ "$ZYGAL_ASYNC" = 'all' ] && {
             ZYGAL_ASYNC_RUNNING_COUNT=$(( ZYGAL_ASYNC_RUNNING_COUNT + 1 ))
             async_job zygal_async_worker zygal_vcs_info "$ZYGAL_VCS_FORMAT"
-        }
-
-        $ZYGAL_ENABLE_VCS_REMOTE && [ "$ZYGAL_VCS_REMOTE_COUNT" -eq 0 ] && {
-            ZYGAL_ASYNC_RUNNING_COUNT=$(( ZYGAL_ASYNC_RUNNING_COUNT + 1 ))
-            async_job zygal_async_worker zygal_vcs_info_remote \
-                "$ZYGAL_VCS_FORMAT"
         }
     }
 }
