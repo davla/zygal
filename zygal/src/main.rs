@@ -52,20 +52,8 @@ fn make_git_info(git_status_output: &str) -> Result<String, ZygalError> {
 fn make_branch_name<'a>(
     git_status_lines: &mut impl Iterator<Item = &'a str>,
 ) -> Result<String, ZygalError> {
-    let sha = git_status_lines
-        .next()
-        .ok_or(ZygalError::GitOutputError)?
-        .split_whitespace()
-        .nth(2)
-        .ok_or(ZygalError::GitOutputError)?;
-
-    let branch_name = git_status_lines
-        .next()
-        .ok_or(ZygalError::GitOutputError)?
-        .split_whitespace()
-        .nth(2)
-        .ok_or(ZygalError::GitOutputError)?;
-
+    let sha = git_status_lines.advance()?.split_whitespace().at(2)?;
+    let branch_name = git_status_lines.advance()?.split_whitespace().at(2)?;
     Ok(if branch_name == "(detached)" {
         format!("({}...)", &sha[..7])
     } else {
@@ -83,13 +71,11 @@ fn make_remote_symbols<'a>(
     let mut counts = ab_line.split_whitespace().skip(2);
 
     let ahead_count = counts
-        .next()
-        .ok_or(ZygalError::GitOutputError)?
+        .advance()?
         .parse::<i64>()
         .map_err(|_| ZygalError::GitOutputError)?;
     let behind_count = counts
-        .next()
-        .ok_or(ZygalError::GitOutputError)?
+        .advance()?
         .parse::<i64>()
         .map_err(|_| ZygalError::GitOutputError)?;
 
@@ -110,4 +96,22 @@ where
     F: Fn(&'a &'a str) -> bool,
 {
     if lines.any(f) { symbol } else { "" }
+}
+
+trait GitOutputIterator<T> {
+    fn advance(&mut self) -> Result<T, ZygalError>;
+    fn at(&mut self, at: usize) -> Result<T, ZygalError>;
+}
+
+impl<I, T> GitOutputIterator<T> for I
+where
+    I: Iterator<Item = T>,
+{
+    fn advance(&mut self) -> Result<T, ZygalError> {
+        self.next().ok_or(ZygalError::GitOutputError)
+    }
+
+    fn at(&mut self, at: usize) -> Result<T, ZygalError> {
+        self.nth(at).ok_or(ZygalError::GitOutputError)
+    }
 }
