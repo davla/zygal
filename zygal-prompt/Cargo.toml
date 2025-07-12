@@ -9,3 +9,6 @@ regex = "1.11.1"
 [features]
 default = ["zsh"]
 zsh = []
+
+[dev-dependencies]
+tempdir = "0.3.7"
