@@ -8,6 +8,7 @@ on:
 env:
   CARGO_TERM_COLOR: always
   CARGO_TERM_VERBOSE: 'true'
+  cargo_workspace: ./zygal-prompt
 
 jobs:
   ci:
@@ -23,21 +24,21 @@ jobs:
         path: |
           ~/.cargo/registry
           ~/.cargo/git
-          ./zygal/target
+          ${{ env.cargo_workspace }}/target
         key: cargo-${{ hashFiles('**/Cargo.lock') }}
 
     - name: Format
       run: cargo fmt --check
-      working-directory: ./zygal
+      working-directory: '${{ env.cargo_workspace }}'
 
     - name: Lint
       run: cargo clippy
-      working-directory: ./zygal
+      working-directory: '${{ env.cargo_workspace }}'
 
     - name: Build
       run: cargo build
-      working-directory: ./zygal
+      working-directory: '${{ env.cargo_workspace }}'
 
     - name: Test
       run: cargo test
-      working-directory: ./zygal
+      working-directory: '${{ env.cargo_workspace }}'

@@ -1,5 +1,6 @@
 use regex::Regex;
-use zygal::ZygalError;
+
+use zygal_prompt::ZygalError;
 
 pub fn make_git_info(git_status_output: &str) -> Result<String, ZygalError> {
     let mut lines = git_status_output.lines().map(str::trim);

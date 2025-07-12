@@ -2,7 +2,7 @@ mod git_info;
 
 use std::{env, path::Path, process};
 
-use zygal::ZygalError;
+use zygal_prompt::ZygalError;
 
 use crate::git_info::make_git_info;
 
