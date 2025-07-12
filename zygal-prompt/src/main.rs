@@ -1,6 +1,6 @@
 mod git_info;
 
-use std::{env, path::Path, process};
+use std::process;
 
 use zygal_prompt::ZygalError;
 
@@ -35,19 +35,7 @@ fn git_status_output() -> Result<Option<String>, ZygalError> {
     Ok(stdout)
 }
 
+#[cfg(feature = "zsh")]
 fn shell_escape(s: &str) -> String {
-    let bin_name = env::var("SHELL").ok().and_then(|shell| {
-        Path::new(&shell)
-            .file_name()
-            .map(|file_name| file_name.to_owned())
-    });
-    let Some(bin_name) = bin_name else {
-        return s.to_string();
-    };
-
-    if bin_name == "zsh" {
-        s.replace("%", "%%")
-    } else {
-        s.to_string()
-    }
+    s.replace("%", "%%")
 }

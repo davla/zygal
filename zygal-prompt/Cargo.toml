@@ -5,3 +5,7 @@ edition = "2024"
 
 [dependencies]
 regex = "1.11.1"
+
+[features]
+default = ["zsh"]
+zsh = []
