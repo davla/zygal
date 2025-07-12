@@ -1,6 +1,6 @@
 mod git_info;
 
-use std::process;
+use std::{env, path::Path, process};
 
 use zygal::ZygalError;
 
@@ -11,7 +11,8 @@ const POST_GIT: &str = "\n%F{0}%K{208} %# %f%k ";
 
 fn main() -> Result<(), ZygalError> {
     let git_segment = if let Some(output) = git_status_output()? {
-        format!("%K{{220}} {} ", make_git_info(&output)?)
+        let git_info = shell_escape(&make_git_info(&output)?);
+        format!("%K{{220}} [{git_info}] ")
     } else {
         String::new()
     };
@@ -32,4 +33,21 @@ fn git_status_output() -> Result<Option<String>, ZygalError> {
         None
     };
     Ok(stdout)
+}
+
+fn shell_escape(s: &str) -> String {
+    let bin_name = env::var("SHELL").ok().and_then(|shell| {
+        Path::new(&shell)
+            .file_name()
+            .map(|file_name| file_name.to_owned())
+    });
+    let Some(bin_name) = bin_name else {
+        return s.to_string();
+    };
+
+    if bin_name == "zsh" {
+        s.replace("%", "%%")
+    } else {
+        s.to_string()
+    }
 }
