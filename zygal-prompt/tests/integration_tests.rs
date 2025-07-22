@@ -61,10 +61,12 @@ fn includes_rebasing_when_rebase_conflicts() {
         true,
     );
 
+    let sha = git(&["rev-parse", "--short", "HEAD"], repo_root);
     assert_eq!(
         prompt(repo_root),
         Ok(format!(
-            "%F{{0}}%K{{208}} %3(~.*/%1~.%~) %K{{220}} [{main_branch} B*+] %f%k\n%F{{0}}%K{{208}} %# %f%k "
+            "%F{{0}}%K{{208}} %3(~.*/%1~.%~) %K{{220}} [({}...) B*+] %f%k\n%F{{0}}%K{{208}} %# %f%k ",
+            sha.trim()
         ))
     );
 }
@@ -116,22 +118,25 @@ fn mktemp() -> TempDir {
         .expect("Failed to create temporary directory in integration tests")
 }
 
-fn git(args: &[&str], current_dir: &Path) {
-    spawn_git(args, current_dir, false);
+fn git(args: &[&str], current_dir: &Path) -> String {
+    spawn_git(args, current_dir, false)
 }
 
-fn spawn_git(args: &[&str], current_dir: &Path, expect_failure: bool) {
-    let err_msg = format!("Failed to run 'git {args:?}' in integration tests");
-    process::Command::new("git")
+fn spawn_git(args: &[&str], current_dir: &Path, expect_failure: bool) -> String {
+    let cmd_err_msg = format!("Failed to run 'git {args:?}' in integration tests");
+    let stdout = process::Command::new("git")
         .args(args)
         .current_dir(current_dir)
-        .status()
+        .output()
         .ok()
-        .filter(|status| {
-            let success = status.success();
+        .filter(|output| {
+            let success = output.status.success();
             if expect_failure { !success } else { success }
         })
-        .expect(&err_msg);
+        .expect(&cmd_err_msg)
+        .stdout;
+    let stdout_err_msg = format!("Failed to parse git {args:?} output in integration tests");
+    String::from_utf8(stdout).expect(&stdout_err_msg)
 }
 
 fn git_init(branch: &str, current_dir: &Path) {

@@ -1,34 +1,59 @@
-use std::{path::Path, process};
+use std::{fmt::Write, path::Path};
 
-use crate::{ZygalError, git_info::make_git_info};
+use crate::{ZygalError, git_info::GitInfo, git_patch::GitPatch};
 
 const PRE_GIT: &str = "%F{0}%K{208} %3(~.*/%1~.%~) ";
 const POST_GIT: &str = "\n%F{0}%K{208} %# %f%k ";
 
 pub fn prompt(current_dir: &Path) -> Result<String, ZygalError> {
-    let git_segment = if let Some(output) = git_status_output(current_dir)? {
-        let git_info = shell_escape(&make_git_info(&output)?);
-        format!("%K{{220}} [{git_info}] ")
-    } else {
-        String::new()
-    };
-
+    let git_segment = make_git_segment(current_dir)?.unwrap_or("".to_string());
     Ok(format!("{PRE_GIT}{git_segment}%f%k{POST_GIT}"))
 }
 
-fn git_status_output(current_dir: &Path) -> Result<Option<String>, ZygalError> {
-    let output = process::Command::new("git")
-        .args(["status", "--porcelain=v2", "--branch", "--show-stash"])
-        .current_dir(current_dir)
-        .output()
-        .map_err(|_| ZygalError::GitSpawnError)?;
-
-    let stdout = if output.status.success() {
-        Some(String::from_utf8(output.stdout).map_err(|_| ZygalError::GitOutputError)?)
-    } else {
-        None
+fn make_git_segment(current_dir: &Path) -> Result<Option<String>, ZygalError> {
+    let git_info = match GitInfo::from_git_status_output(current_dir) {
+        Ok(Some(git_info)) => git_info,
+        Ok(None) => return Ok(None),
+        Err(e) => return Err(e),
     };
-    Ok(stdout)
+    let git_patch = GitPatch::detect(current_dir);
+
+    let content = if git_info.has_only_branch() && git_patch.is_none() {
+        git_info.branch_name
+    } else {
+        let mut s = format!("{} ", git_info.branch_name);
+        if let Some(patch) = git_patch {
+            write!(s, "{patch}").map_err(|_| ZygalError::FromatError)?;
+        }
+        if git_info.unstaged {
+            s.push('*');
+        }
+        if git_info.staged {
+            s.push('+');
+        }
+        if git_info.stash {
+            s.push('+');
+        }
+        if git_info.untracked {
+            s.push('%');
+        }
+        if let Some(remote_diff) = git_info.remote_diff.as_ref() {
+            write!(s, "{remote_diff}").map_err(|_| ZygalError::FromatError)?;
+        }
+        s
+    };
+
+    Ok(Some(format!("%K{{220}} [{}] ", shell_escape(&content))))
+}
+
+impl GitInfo {
+    fn has_only_branch(&self) -> bool {
+        !(self.remote_diff.is_some()
+            || self.stash
+            || self.untracked
+            || self.unstaged
+            || self.staged)
+    }
 }
 
 #[cfg(feature = "zsh")]

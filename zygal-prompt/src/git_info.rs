@@ -1,74 +1,125 @@
+use std::{fmt::Display, path::Path, process, str::FromStr, sync::LazyLock};
+
 use regex::Regex;
 
 use crate::ZygalError;
 
-pub fn make_git_info(git_status_output: &str) -> Result<String, ZygalError> {
-    let mut lines = git_status_output.lines().map(str::trim);
-
-    let branch_name = make_branch_name(&mut lines)?;
-
-    let lines: Vec<&str> = lines.collect();
-    let remote = make_remote_symbols(lines.iter())?;
-    let stash = any_or_empty(lines.iter(), |l| l.starts_with("# stash"), "$");
-    let untracked = any_or_empty(lines.iter(), |l| l.starts_with("?"), "%");
-
-    let staged_regex = Regex::new(r"^[12u] [MTARCDU].").unwrap();
-    let staged = any_or_empty(lines.iter(), |l| staged_regex.is_match(l), "+");
-
-    let unstaged_regex = Regex::new(r"^[12u] .[MTARCDU]").unwrap();
-    let unstaged = any_or_empty(lines.iter(), |l| unstaged_regex.is_match(l), "*");
-
-    let git_info = format!("{branch_name} {unstaged}{staged}{stash}{untracked}{remote}");
-    Ok(git_info.trim().to_string())
+#[derive(Debug, PartialEq)]
+pub struct GitInfo {
+    pub branch_name: String,
+    pub remote_diff: Option<GitRemoteDiff>,
+    pub stash: bool,
+    pub untracked: bool,
+    pub staged: bool,
+    pub unstaged: bool,
 }
 
-fn make_branch_name<'a>(
-    git_status_lines: &mut impl Iterator<Item = &'a str>,
-) -> Result<String, ZygalError> {
-    let sha = git_status_lines.advance()?.split_whitespace().at(2)?;
-    let branch_name = git_status_lines.advance()?.split_whitespace().at(2)?;
-    Ok(if branch_name == "(detached)" {
-        format!("({}...)", &sha[..7])
-    } else {
-        branch_name.to_string()
-    })
+#[derive(Debug, PartialEq)]
+pub struct GitRemoteDiff {
+    pub incoming: bool,
+    pub outgoing: bool,
 }
 
-fn make_remote_symbols<'a>(
-    mut git_status_lines: impl Iterator<Item = &'a &'a str>,
-) -> Result<&'static str, ZygalError> {
-    let Some(ab_line) = git_status_lines.find(|l| l.starts_with("# branch.ab")) else {
-        return Ok("");
-    };
+static STAGED_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^[12u] [MTARCDU].").expect("Static regex is valid"));
+static UNSTAGED_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^[12u] .[MTARCDU]").expect("Static regex is valid"));
 
-    let mut counts = ab_line.split_whitespace().skip(2);
+impl FromStr for GitInfo {
+    type Err = ZygalError;
 
-    let incoming_count = counts
-        .advance()?
-        .parse::<i64>()
-        .map_err(|_| ZygalError::GitOutputError)?;
-    let outgoing_count = counts
-        .advance()?
-        .parse::<i64>()
-        .map_err(|_| ZygalError::GitOutputError)?;
+    fn from_str(git_status_output: &str) -> Result<Self, Self::Err> {
+        let mut lines = git_status_output.lines().map(str::trim);
 
-    Ok(match (incoming_count, outgoing_count) {
-        (0, 0) => "=",
-        (0, _) => "<",
-        (_, 0) => ">",
-        (_, _) => "<>",
-    })
+        let branch_name = Self::make_branch_name(&mut lines)?;
+
+        let lines: Vec<&str> = lines.collect();
+        let remote_diff = GitRemoteDiff::parse(lines.iter())?;
+        let stash = lines.iter().any(|l| l.starts_with("# stash"));
+        let untracked = lines.iter().any(|l| l.starts_with("?"));
+        let staged = lines.iter().any(|l| STAGED_REGEX.is_match(l));
+        let unstaged = lines.iter().any(|l| UNSTAGED_REGEX.is_match(l));
+
+        Ok(Self {
+            branch_name,
+            remote_diff,
+            stash,
+            untracked,
+            staged,
+            unstaged,
+        })
+    }
 }
 
-fn any_or_empty<'a, F>(
-    mut lines: impl Iterator<Item = &'a &'a str>,
-    f: F,
-    symbol: &'static str,
-) -> &'static str
-where
-    F: Fn(&'a &'a str) -> bool,
-{
-    if lines.any(f) { symbol } else { "" }
+impl GitInfo {
+    pub fn from_git_status_output(current_dir: &Path) -> Result<Option<Self>, ZygalError> {
+        let output = process::Command::new("git")
+            .args(["status", "--porcelain=v2", "--branch", "--show-stash"])
+            .current_dir(current_dir)
+            .output()
+            .map_err(|_| ZygalError::GitSpawnError)?;
+
+        if !output.status.success() {
+            return Ok(None);
+        }
+
+        let stdout = String::from_utf8(output.stdout).map_err(|_| ZygalError::GitOutputError)?;
+        stdout.parse::<Self>().map(|git_info| Some(git_info))
+    }
+
+    fn make_branch_name<'a>(
+        git_status_lines: &mut impl Iterator<Item = &'a str>,
+    ) -> Result<String, ZygalError> {
+        let sha = git_status_lines.advance()?.split_whitespace().at(2)?;
+        let branch_name = git_status_lines.advance()?.split_whitespace().at(2)?;
+        Ok(if branch_name == "(detached)" {
+            format!("({}...)", &sha[..7])
+        } else {
+            branch_name.to_string()
+        })
+    }
+}
+
+impl GitRemoteDiff {
+    fn parse<'a>(
+        mut git_status_lines: impl Iterator<Item = &'a &'a str>,
+    ) -> Result<Option<Self>, ZygalError> {
+        let Some(ab_line) = git_status_lines.find(|l| l.starts_with("# branch.ab")) else {
+            return Ok(None);
+        };
+
+        let mut counts = ab_line.split_whitespace().skip(2);
+
+        let outgoing_count = counts
+            .advance()?
+            .parse::<i64>()
+            .map_err(|_| ZygalError::GitOutputError)?;
+        let incoming_count = counts
+            .advance()?
+            .parse::<i64>()
+            .map_err(|_| ZygalError::GitOutputError)?;
+
+        Ok(Some(Self {
+            incoming: incoming_count != 0,
+            outgoing: outgoing_count != 0,
+        }))
+    }
+}
+
+impl Display for GitRemoteDiff {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if !self.incoming && !self.outgoing {
+            return write!(f, "=");
+        }
+
+        if self.incoming {
+            write!(f, "<")?;
+        }
+        if self.outgoing {
+            write!(f, ">")?;
+        }
+        Ok(())
+    }
 }
 
 trait GitOutputIterator<T> {
@@ -99,7 +150,7 @@ mod tests {
             # stash number-not-used
         "
         .trim();
-        let git_info = make_git_info(status_output);
+        let git_info = status_output.parse::<GitInfo>();
         assert_eq!(git_info, Err(ZygalError::GitOutputError));
     }
 
@@ -112,8 +163,11 @@ mod tests {
             # branch.head {branch_name}
             "
         );
-        let git_info = make_git_info(status_output.trim());
-        assert_eq!(git_info.as_deref(), Ok(branch_name));
+        let git_info = status_output.trim().parse::<GitInfo>();
+        assert_eq!(
+            git_info.map(|info| info.branch_name).as_deref(),
+            Ok(branch_name)
+        );
     }
 
     #[test]
@@ -123,8 +177,11 @@ mod tests {
             # branch.head (detached)
         "
         .trim();
-        let git_info = make_git_info(status_output);
-        assert_eq!(git_info.as_deref(), Ok("(faeddf8...)"));
+        let git_info = status_output.parse::<GitInfo>();
+        assert_eq!(
+            git_info.map(|info| info.branch_name).as_deref(),
+            Ok("(faeddf8...)")
+        );
     }
 
     #[test]
@@ -135,8 +192,8 @@ mod tests {
             # stash number-not-used
         "
         .trim();
-        let git_info = make_git_info(status_output);
-        assert!(git_info.is_ok_and(|info| info.contains("$")))
+        let git_info = status_output.parse::<GitInfo>();
+        assert!(git_info.is_ok_and(|info| info.stash));
     }
 
     #[test]
@@ -147,8 +204,8 @@ mod tests {
             ? path-not-used
         "
         .trim();
-        let git_info = make_git_info(status_output);
-        assert!(git_info.is_ok_and(|info| info.contains("%")))
+        let git_info = status_output.parse::<GitInfo>();
+        assert!(git_info.is_ok_and(|info| info.untracked))
     }
 
     #[test]
@@ -159,8 +216,8 @@ mod tests {
             1 Dwhatever
         "
         .trim();
-        let git_info = make_git_info(status_output);
-        assert!(git_info.is_ok_and(|info| info.contains("+")))
+        let git_info = status_output.parse::<GitInfo>();
+        assert!(git_info.is_ok_and(|info| info.staged))
     }
 
     #[test]
@@ -171,8 +228,8 @@ mod tests {
             1 WD
         "
         .trim();
-        let git_info = make_git_info(status_output);
-        assert!(git_info.is_ok_and(|info| info.contains("*")))
+        let git_info = status_output.parse::<GitInfo>();
+        assert!(git_info.is_ok_and(|info| info.unstaged))
     }
 
     #[test]
@@ -183,8 +240,11 @@ mod tests {
             # branch.ab +0 -0
         "
         .trim();
-        let git_info = make_git_info(status_output);
-        assert!(git_info.is_ok_and(|info| info.contains("=")))
+        let git_info = status_output.parse::<GitInfo>();
+        assert!(git_info.is_ok_and(|info| {
+            info.remote_diff
+                .is_some_and(|remote| !remote.incoming && !remote.outgoing)
+        }))
     }
 
     #[test]
@@ -195,8 +255,11 @@ mod tests {
             # branch.ab +7 -0
         "
         .trim();
-        let git_info = make_git_info(status_output);
-        assert!(git_info.is_ok_and(|info| info.contains(">")))
+        let git_info = status_output.parse::<GitInfo>();
+        assert!(git_info.is_ok_and(|info| {
+            info.remote_diff
+                .is_some_and(|remote| remote.outgoing && !remote.incoming)
+        }))
     }
 
     #[test]
@@ -207,8 +270,11 @@ mod tests {
             # branch.ab +0 -3
         "
         .trim();
-        let git_info = make_git_info(status_output);
-        assert!(git_info.is_ok_and(|info| info.contains("<")))
+        let git_info = status_output.parse::<GitInfo>();
+        assert!(git_info.is_ok_and(|info| {
+            info.remote_diff
+                .is_some_and(|remote| remote.incoming && !remote.outgoing)
+        }))
     }
 
     #[test]
@@ -219,8 +285,23 @@ mod tests {
             # branch.ab +9 -3
         "
         .trim();
-        let git_info = make_git_info(status_output);
-        assert!(git_info.is_ok_and(|info| info.contains("<>")))
+        let git_info = status_output.parse::<GitInfo>();
+        assert!(git_info.is_ok_and(|info| {
+            info.remote_diff
+                .is_some_and(|remote| remote.incoming && remote.outgoing)
+        }))
+    }
+
+    #[test]
+    fn no_remote_diff_when_no_remote() {
+        let status_output = "
+            # branch.oid unused-invalid-sha
+            # branch.head feature/monothremes
+            u AD
+        "
+        .trim();
+        let git_info = status_output.parse::<GitInfo>();
+        assert!(git_info.is_ok_and(|info| info.remote_diff.is_none()))
     }
 
     #[test]
@@ -234,8 +315,21 @@ mod tests {
             ? not-used-file-name
         "
         .trim();
-        let git_info = make_git_info(status_output);
-        assert_eq!(git_info.as_deref(), Ok("feature/monothremes +%<"))
+        let git_info = status_output.parse::<GitInfo>();
+        assert_eq!(
+            git_info,
+            Ok(GitInfo {
+                branch_name: "feature/monothremes".to_string(),
+                staged: true,
+                untracked: true,
+                remote_diff: Some(GitRemoteDiff {
+                    incoming: true,
+                    outgoing: false
+                }),
+                stash: false,
+                unstaged: false
+            })
+        )
     }
 
     #[test]
@@ -249,8 +343,21 @@ mod tests {
             2 .R
         "
         .trim();
-        let git_info = make_git_info(status_output);
-        assert_eq!(git_info.as_deref(), Ok("(dfcac0b...) *$="))
+        let git_info = status_output.parse::<GitInfo>();
+        assert_eq!(
+            git_info,
+            Ok(GitInfo {
+                branch_name: "(dfcac0b...)".to_string(),
+                stash: true,
+                unstaged: true,
+                remote_diff: Some(GitRemoteDiff {
+                    incoming: false,
+                    outgoing: false
+                }),
+                staged: false,
+                untracked: false,
+            })
+        )
     }
 
     #[test]
@@ -263,7 +370,17 @@ mod tests {
             1 DD
         "
         .trim();
-        let git_info = make_git_info(status_output);
-        assert_eq!(git_info.as_deref(), Ok("feature/hymenoptera *+"))
+        let git_info = status_output.parse::<GitInfo>();
+        assert_eq!(
+            git_info,
+            Ok(GitInfo {
+                branch_name: "feature/hymenoptera".to_string(),
+                staged: true,
+                unstaged: true,
+                remote_diff: None,
+                stash: false,
+                untracked: false,
+            })
+        )
     }
 }
