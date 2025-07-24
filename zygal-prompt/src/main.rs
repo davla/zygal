@@ -1,9 +1,10 @@
 use std::env;
 
-use zygal_prompt::{ZygalError, prompt::prompt};
+use anyhow::Context;
+use zygal_prompt::prompt::prompt;
 
-fn main() -> Result<(), ZygalError> {
-    let current_dir = env::current_dir().map_err(|_| ZygalError::CurrentDirError)?;
+fn main() -> anyhow::Result<()> {
+    let current_dir = env::current_dir().context("Failed retrieving current working directory")?;
     println!("{}", prompt(&current_dir)?);
     Ok(())
 }

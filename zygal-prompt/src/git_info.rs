@@ -1,8 +1,7 @@
 use std::{fmt::Display, path::Path, process, str::FromStr, sync::LazyLock};
 
+use anyhow::Context;
 use regex::Regex;
-
-use crate::ZygalError;
 
 #[derive(Debug, PartialEq)]
 pub struct GitInfo {
@@ -26,9 +25,9 @@ static UNSTAGED_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^[12u] .[MTARCDU]").expect("Static regex is valid"));
 
 impl FromStr for GitInfo {
-    type Err = ZygalError;
+    type Err = anyhow::Error;
 
-    fn from_str(git_status_output: &str) -> Result<Self, Self::Err> {
+    fn from_str(git_status_output: &str) -> anyhow::Result<Self> {
         let mut lines = git_status_output.lines().map(str::trim);
 
         let branch_name = Self::make_branch_name(&mut lines)?;
@@ -52,26 +51,39 @@ impl FromStr for GitInfo {
 }
 
 impl GitInfo {
-    pub fn from_git_status_output(current_dir: &Path) -> Result<Option<Self>, ZygalError> {
+    pub fn from_git_status_output(current_dir: &Path) -> anyhow::Result<Option<Self>> {
         let output = process::Command::new("git")
             .args(["status", "--porcelain=v2", "--branch", "--show-stash"])
             .current_dir(current_dir)
             .output()
-            .map_err(|_| ZygalError::GitSpawnError)?;
+            .context("Failed to spawn subprocess to execute git status")?;
 
         if !output.status.success() {
             return Ok(None);
         }
 
-        let stdout = String::from_utf8(output.stdout).map_err(|_| ZygalError::GitOutputError)?;
-        stdout.parse::<Self>().map(|git_info| Some(git_info))
+        let stdout = String::from_utf8(output.stdout)
+            .context("Failed to read git status output as an UTF-8 string")?;
+        stdout.parse::<Self>().map(Some)
     }
 
     fn make_branch_name<'a>(
         git_status_lines: &mut impl Iterator<Item = &'a str>,
-    ) -> Result<String, ZygalError> {
-        let sha = git_status_lines.advance()?.split_whitespace().at(2)?;
-        let branch_name = git_status_lines.advance()?.split_whitespace().at(2)?;
+    ) -> anyhow::Result<String> {
+        let sha = git_status_lines
+            .next()
+            .context("Missing # branch.oid header in git status output")?
+            .split_whitespace()
+            .nth(2)
+            .context("Malformed # branch.oid header in git status output")?;
+
+        let branch_name = git_status_lines
+            .next()
+            .context("Missing # branch.head header in git status output")?
+            .split_whitespace()
+            .nth(2)
+            .context("Malformed # branch.head header in git status output")?;
+
         Ok(if branch_name == "(detached)" {
             format!("({}...)", &sha[..7])
         } else {
@@ -83,21 +95,22 @@ impl GitInfo {
 impl GitRemoteDiff {
     fn parse<'a>(
         mut git_status_lines: impl Iterator<Item = &'a &'a str>,
-    ) -> Result<Option<Self>, ZygalError> {
+    ) -> anyhow::Result<Option<Self>> {
         let Some(ab_line) = git_status_lines.find(|l| l.starts_with("# branch.ab")) else {
             return Ok(None);
         };
 
         let mut counts = ab_line.split_whitespace().skip(2);
-
         let outgoing_count = counts
-            .advance()?
+            .next()
+            .context("Missing outgoing count in git status # branch.ab header")?
             .parse::<i64>()
-            .map_err(|_| ZygalError::GitOutputError)?;
+            .context("Failed to parse outgoing count in git status # branch.ab header")?;
         let incoming_count = counts
-            .advance()?
+            .next()
+            .context("Missing incoming count in git status # branch.ab header")?
             .parse::<i64>()
-            .map_err(|_| ZygalError::GitOutputError)?;
+            .context("Failed to parse incoming count in git status # branch.ab header")?;
 
         Ok(Some(Self {
             incoming: incoming_count != 0,
@@ -122,24 +135,6 @@ impl Display for GitRemoteDiff {
     }
 }
 
-trait GitOutputIterator<T> {
-    fn advance(&mut self) -> Result<T, ZygalError>;
-    fn at(&mut self, at: usize) -> Result<T, ZygalError>;
-}
-
-impl<I, T> GitOutputIterator<T> for I
-where
-    I: Iterator<Item = T>,
-{
-    fn advance(&mut self) -> Result<T, ZygalError> {
-        self.next().ok_or(ZygalError::GitOutputError)
-    }
-
-    fn at(&mut self, at: usize) -> Result<T, ZygalError> {
-        self.nth(at).ok_or(ZygalError::GitOutputError)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -151,11 +146,11 @@ mod tests {
         "
         .trim();
         let git_info = status_output.parse::<GitInfo>();
-        assert_eq!(git_info, Err(ZygalError::GitOutputError));
+        assert!(git_info.is_err());
     }
 
     #[test]
-    fn uses_branch_name_when_not_detached_head() {
+    fn uses_branch_name_when_not_detached_head() -> anyhow::Result<()> {
         let branch_name = "feature/honey-badgers";
         let status_output = format!(
             "
@@ -163,149 +158,166 @@ mod tests {
             # branch.head {branch_name}
             "
         );
-        let git_info = status_output.trim().parse::<GitInfo>();
-        assert_eq!(
-            git_info.map(|info| info.branch_name).as_deref(),
-            Ok(branch_name)
-        );
+        let git_info = status_output.trim().parse::<GitInfo>()?;
+        assert_eq!(git_info.branch_name, branch_name);
+        Ok(())
     }
 
     #[test]
-    fn uses_commit_sha_when_detached_head() {
+    fn uses_commit_sha_when_detached_head() -> anyhow::Result<()> {
         let status_output = "
             # branch.oid faeddf84c5077e7df0025334801d379bb94fc64f
             # branch.head (detached)
         "
         .trim();
-        let git_info = status_output.parse::<GitInfo>();
-        assert_eq!(
-            git_info.map(|info| info.branch_name).as_deref(),
-            Ok("(faeddf8...)")
-        );
+        let git_info = status_output.parse::<GitInfo>()?;
+        assert_eq!(git_info.branch_name, "(faeddf8...)");
+        Ok(())
     }
 
     #[test]
-    fn includes_stashes() {
+    fn includes_stashes() -> anyhow::Result<()> {
         let status_output = "
             # branch.oid unused-invalid-sha
             # branch.head feature/spider-monkey
             # stash number-not-used
         "
         .trim();
-        let git_info = status_output.parse::<GitInfo>();
-        assert!(git_info.is_ok_and(|info| info.stash));
+        let git_info = status_output.parse::<GitInfo>()?;
+        assert_eq!(git_info.stash, true);
+        Ok(())
     }
 
     #[test]
-    fn includes_untracked() {
+    fn includes_untracked() -> anyhow::Result<()> {
         let status_output = "
             # branch.oid unused-invalid-sha
             # branch.head feature/hippopotamus
             ? path-not-used
         "
         .trim();
-        let git_info = status_output.parse::<GitInfo>();
-        assert!(git_info.is_ok_and(|info| info.untracked))
+        let git_info = status_output.parse::<GitInfo>()?;
+        assert_eq!(git_info.untracked, true);
+        Ok(())
     }
 
     #[test]
-    fn includes_staged() {
+    fn includes_staged() -> anyhow::Result<()> {
         let status_output = "
             # branch.oid unused-invalid-sha
             # branch.head feature/gorgonopsia
             1 Dwhatever
         "
         .trim();
-        let git_info = status_output.parse::<GitInfo>();
-        assert!(git_info.is_ok_and(|info| info.staged))
+        let git_info = status_output.parse::<GitInfo>()?;
+        assert_eq!(git_info.staged, true);
+        Ok(())
     }
 
     #[test]
-    fn includes_unstaged() {
+    fn includes_unstaged() -> anyhow::Result<()> {
         let status_output = "
             # branch.oid unused-invalid-sha
             # branch.head feature/microraptoria
             1 WD
         "
         .trim();
-        let git_info = status_output.parse::<GitInfo>();
-        assert!(git_info.is_ok_and(|info| info.unstaged))
+        let git_info = status_output.parse::<GitInfo>()?;
+        assert_eq!(git_info.unstaged, true);
+        Ok(())
     }
 
     #[test]
-    fn includes_remote_on_par() {
+    fn includes_remote_on_par() -> anyhow::Result<()> {
         let status_output = "
             # branch.oid unused-invalid-sha
             # branch.head feature/placoderms
             # branch.ab +0 -0
         "
         .trim();
-        let git_info = status_output.parse::<GitInfo>();
-        assert!(git_info.is_ok_and(|info| {
-            info.remote_diff
-                .is_some_and(|remote| !remote.incoming && !remote.outgoing)
-        }))
+        let git_info = status_output.parse::<GitInfo>()?;
+        assert_eq!(
+            git_info.remote_diff,
+            Some(GitRemoteDiff {
+                incoming: false,
+                outgoing: false
+            })
+        );
+        Ok(())
     }
 
     #[test]
-    fn includes_remote_with_outgoing() {
+    fn includes_remote_with_outgoing() -> anyhow::Result<()> {
         let status_output = "
             # branch.oid unused-invalid-sha
             # branch.head feature/ichthyosauria
             # branch.ab +7 -0
         "
         .trim();
-        let git_info = status_output.parse::<GitInfo>();
-        assert!(git_info.is_ok_and(|info| {
-            info.remote_diff
-                .is_some_and(|remote| remote.outgoing && !remote.incoming)
-        }))
+        let git_info = status_output.parse::<GitInfo>()?;
+        assert_eq!(
+            git_info.remote_diff,
+            Some(GitRemoteDiff {
+                outgoing: true,
+                incoming: false,
+            })
+        );
+        Ok(())
     }
 
     #[test]
-    fn includes_remote_with_incoming() {
+    fn includes_remote_with_incoming() -> anyhow::Result<()> {
         let status_output = "
             # branch.oid unused-invalid-sha
             # branch.head feature/hyaenodonta
             # branch.ab +0 -3
         "
         .trim();
-        let git_info = status_output.parse::<GitInfo>();
-        assert!(git_info.is_ok_and(|info| {
-            info.remote_diff
-                .is_some_and(|remote| remote.incoming && !remote.outgoing)
-        }))
+        let git_info = status_output.parse::<GitInfo>()?;
+        assert_eq!(
+            git_info.remote_diff,
+            Some(GitRemoteDiff {
+                outgoing: false,
+                incoming: true,
+            })
+        );
+        Ok(())
     }
 
     #[test]
-    fn includes_diverged_remote() {
+    fn includes_diverged_remote() -> anyhow::Result<()> {
         let status_output = "
             # branch.oid unused-invalid-sha
             # branch.head feature/ceratopsia
             # branch.ab +9 -3
         "
         .trim();
-        let git_info = status_output.parse::<GitInfo>();
-        assert!(git_info.is_ok_and(|info| {
-            info.remote_diff
-                .is_some_and(|remote| remote.incoming && remote.outgoing)
-        }))
+        let git_info = status_output.parse::<GitInfo>()?;
+        assert_eq!(
+            git_info.remote_diff,
+            Some(GitRemoteDiff {
+                outgoing: true,
+                incoming: true,
+            })
+        );
+        Ok(())
     }
 
     #[test]
-    fn no_remote_diff_when_no_remote() {
+    fn no_remote_diff_when_no_remote() -> anyhow::Result<()> {
         let status_output = "
             # branch.oid unused-invalid-sha
             # branch.head feature/monothremes
             u AD
         "
         .trim();
-        let git_info = status_output.parse::<GitInfo>();
-        assert!(git_info.is_ok_and(|info| info.remote_diff.is_none()))
+        let git_info = status_output.parse::<GitInfo>()?;
+        assert!(git_info.remote_diff.is_none());
+        Ok(())
     }
 
     #[test]
-    fn includes_branch_staged_untracked_incoming_remote() {
+    fn includes_branch_staged_untracked_incoming_remote() -> anyhow::Result<()> {
         let status_output = "
             # branch.oid unused-invalid-sha
             # branch.head feature/monothremes
@@ -315,10 +327,10 @@ mod tests {
             ? not-used-file-name
         "
         .trim();
-        let git_info = status_output.parse::<GitInfo>();
+        let git_info = status_output.parse::<GitInfo>()?;
         assert_eq!(
             git_info,
-            Ok(GitInfo {
+            GitInfo {
                 branch_name: "feature/monothremes".to_string(),
                 staged: true,
                 untracked: true,
@@ -328,12 +340,13 @@ mod tests {
                 }),
                 stash: false,
                 unstaged: false
-            })
-        )
+            }
+        );
+        Ok(())
     }
 
     #[test]
-    fn includes_sha_stash_unstaged_on_par_remote() {
+    fn includes_sha_stash_unstaged_on_par_remote() -> anyhow::Result<()> {
         let status_output = "
             # branch.oid dfcac0b563036735405591415163566f9f908e1e
             # branch.head (detached)
@@ -343,10 +356,10 @@ mod tests {
             2 .R
         "
         .trim();
-        let git_info = status_output.parse::<GitInfo>();
+        let git_info = status_output.parse::<GitInfo>()?;
         assert_eq!(
             git_info,
-            Ok(GitInfo {
+            GitInfo {
                 branch_name: "(dfcac0b...)".to_string(),
                 stash: true,
                 unstaged: true,
@@ -356,12 +369,13 @@ mod tests {
                 }),
                 staged: false,
                 untracked: false,
-            })
-        )
+            }
+        );
+        Ok(())
     }
 
     #[test]
-    fn includes_branch_staged_unstaged_no_remote() {
+    fn includes_branch_staged_unstaged_no_remote() -> anyhow::Result<()> {
         let status_output = "
             # branch.oid unused-invalid-sha
             # branch.head feature/hymenoptera
@@ -370,17 +384,18 @@ mod tests {
             1 DD
         "
         .trim();
-        let git_info = status_output.parse::<GitInfo>();
+        let git_info = status_output.parse::<GitInfo>()?;
         assert_eq!(
             git_info,
-            Ok(GitInfo {
+            GitInfo {
                 branch_name: "feature/hymenoptera".to_string(),
                 staged: true,
                 unstaged: true,
                 remote_diff: None,
                 stash: false,
                 untracked: false,
-            })
-        )
+            }
+        );
+        Ok(())
     }
 }
