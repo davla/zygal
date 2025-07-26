@@ -33,7 +33,7 @@ impl FromStr for GitInfo {
         let branch_name = Self::make_branch_name(&mut lines)?;
 
         let lines: Vec<&str> = lines.collect();
-        let remote_diff = GitRemoteDiff::parse(lines.iter())?;
+        let remote_diff = GitRemoteDiff::parse(lines.iter().copied())?;
         let stash = lines.iter().any(|l| l.starts_with("# stash"));
         let untracked = lines.iter().any(|l| l.starts_with("?"));
         let staged = lines.iter().any(|l| STAGED_REGEX.is_match(l));
@@ -94,7 +94,7 @@ impl GitInfo {
 
 impl GitRemoteDiff {
     fn parse<'a>(
-        mut git_status_lines: impl Iterator<Item = &'a &'a str>,
+        mut git_status_lines: impl Iterator<Item = &'a str>,
     ) -> anyhow::Result<Option<Self>> {
         let Some(ab_line) = git_status_lines.find(|l| l.starts_with("# branch.ab")) else {
             return Ok(None);
@@ -228,95 +228,6 @@ mod tests {
     }
 
     #[test]
-    fn includes_remote_on_par() -> anyhow::Result<()> {
-        let status_output = "
-            # branch.oid unused-invalid-sha
-            # branch.head feature/placoderms
-            # branch.ab +0 -0
-        "
-        .trim();
-        let git_info = status_output.parse::<GitInfo>()?;
-        assert_eq!(
-            git_info.remote_diff,
-            Some(GitRemoteDiff {
-                incoming: false,
-                outgoing: false
-            })
-        );
-        Ok(())
-    }
-
-    #[test]
-    fn includes_remote_with_outgoing() -> anyhow::Result<()> {
-        let status_output = "
-            # branch.oid unused-invalid-sha
-            # branch.head feature/ichthyosauria
-            # branch.ab +7 -0
-        "
-        .trim();
-        let git_info = status_output.parse::<GitInfo>()?;
-        assert_eq!(
-            git_info.remote_diff,
-            Some(GitRemoteDiff {
-                outgoing: true,
-                incoming: false,
-            })
-        );
-        Ok(())
-    }
-
-    #[test]
-    fn includes_remote_with_incoming() -> anyhow::Result<()> {
-        let status_output = "
-            # branch.oid unused-invalid-sha
-            # branch.head feature/hyaenodonta
-            # branch.ab +0 -3
-        "
-        .trim();
-        let git_info = status_output.parse::<GitInfo>()?;
-        assert_eq!(
-            git_info.remote_diff,
-            Some(GitRemoteDiff {
-                outgoing: false,
-                incoming: true,
-            })
-        );
-        Ok(())
-    }
-
-    #[test]
-    fn includes_diverged_remote() -> anyhow::Result<()> {
-        let status_output = "
-            # branch.oid unused-invalid-sha
-            # branch.head feature/ceratopsia
-            # branch.ab +9 -3
-        "
-        .trim();
-        let git_info = status_output.parse::<GitInfo>()?;
-        assert_eq!(
-            git_info.remote_diff,
-            Some(GitRemoteDiff {
-                outgoing: true,
-                incoming: true,
-            })
-        );
-        Ok(())
-    }
-
-    #[test]
-    fn no_remote_diff_when_no_remote() -> anyhow::Result<()> {
-        let status_output = "
-            # branch.oid unused-invalid-sha
-            # branch.head feature/monothremes
-            u AD
-        "
-        .trim();
-        let git_info = status_output.parse::<GitInfo>()?;
-        assert!(git_info.remote_diff.is_none());
-        Ok(())
-    }
-
-    #[test]
     fn includes_branch_staged_untracked_incoming_remote() -> anyhow::Result<()> {
         let status_output = "
             # branch.oid unused-invalid-sha
@@ -397,5 +308,124 @@ mod tests {
             }
         );
         Ok(())
+    }
+
+    mod git_remote_diff {
+        use super::*;
+
+        #[test]
+        fn includes_remote_on_par() -> anyhow::Result<()> {
+            let status_output = "# branch.ab +0 -0";
+            let git_remote_diff = GitRemoteDiff::parse(status_output.lines())?;
+            assert_eq!(
+                git_remote_diff,
+                Some(GitRemoteDiff {
+                    incoming: false,
+                    outgoing: false
+                })
+            );
+            Ok(())
+        }
+
+        #[test]
+        fn includes_remote_with_outgoing() -> anyhow::Result<()> {
+            let status_output = "# branch.ab +7 -0";
+            let git_remote_diff = GitRemoteDiff::parse(status_output.lines())?;
+            assert_eq!(
+                git_remote_diff,
+                Some(GitRemoteDiff {
+                    outgoing: true,
+                    incoming: false,
+                })
+            );
+            Ok(())
+        }
+
+        #[test]
+        fn includes_remote_with_incoming() -> anyhow::Result<()> {
+            let status_output = "# branch.ab +0 -3";
+            let git_remote_diff = GitRemoteDiff::parse(status_output.lines())?;
+            assert_eq!(
+                git_remote_diff,
+                Some(GitRemoteDiff {
+                    outgoing: false,
+                    incoming: true,
+                })
+            );
+            Ok(())
+        }
+
+        #[test]
+        fn includes_diverged_remote() -> anyhow::Result<()> {
+            let status_output = "# branch.ab +9 -3";
+            let git_remote_diff = GitRemoteDiff::parse(status_output.lines())?;
+            assert_eq!(
+                git_remote_diff,
+                Some(GitRemoteDiff {
+                    outgoing: true,
+                    incoming: true,
+                })
+            );
+            Ok(())
+        }
+
+        #[test]
+        fn none_when_no_remote_line() -> anyhow::Result<()> {
+            let status_output = "u AD";
+            let git_remote_diff = GitRemoteDiff::parse(status_output.lines())?;
+            assert!(git_remote_diff.is_none());
+            Ok(())
+        }
+
+        #[test]
+        fn finds_remote_line_amidst_other_output() -> anyhow::Result<()> {
+            let status_lines = "
+                # stash number-not-used
+                # branch.ab +0 -0
+                u .D
+            "
+            .trim()
+            .lines()
+            .map(str::trim);
+            let git_remote_diff = GitRemoteDiff::parse(status_lines)?;
+            assert!(git_remote_diff.is_some());
+            Ok(())
+        }
+
+        #[test]
+        fn displays_remote_on_par() {
+            let git_remote_diff = GitRemoteDiff {
+                incoming: false,
+                outgoing: false,
+            };
+            assert_eq!(git_remote_diff.to_string(), "=");
+        }
+
+        #[test]
+        fn displays_remote_outgoing() {
+            let git_remote_diff = GitRemoteDiff {
+                incoming: false,
+                outgoing: true,
+            };
+            assert_eq!(git_remote_diff.to_string(), ">");
+        }
+
+        #[test]
+        fn displays_remote_incoming() {
+            let git_remote_diff = GitRemoteDiff {
+                incoming: true,
+                outgoing: false,
+            };
+            assert_eq!(git_remote_diff.to_string(), "<");
+        }
+
+        #[test]
+        fn displays_remote_diverged() {
+            let git_remote_diff = GitRemoteDiff {
+                incoming: true,
+                outgoing: true,
+            };
+            assert_eq!(git_remote_diff.to_string(), "<>");
+        }
     }
 }
