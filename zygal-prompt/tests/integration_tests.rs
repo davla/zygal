@@ -1,6 +1,6 @@
 use std::{fs, path::Path, process};
 
-use anyhow::Context;
+use anyhow::{Context, anyhow};
 use tempdir::TempDir;
 use zygal_prompt::prompt::prompt;
 
@@ -132,24 +132,41 @@ fn git(args: &[&str], current_dir: &Path) -> anyhow::Result<String> {
 }
 
 fn spawn_git(args: &[&str], current_dir: &Path, expect_failure: bool) -> anyhow::Result<String> {
-    let stdout = process::Command::new("git")
+    let output = process::Command::new("git")
         .args(args)
         .current_dir(current_dir)
         .output()
-        .ok()
-        .filter(|output| {
-            let success = output.status.success();
-            if expect_failure { !success } else { success }
-        })
-        .context(format!("Failed to run 'git {args:?}' in integration tests"))?
-        .stdout;
-    String::from_utf8(stdout).context(format!(
-        "Failed to parse git {args:?} output in integration tests"
-    ))
+        .context(format!("Failed to run 'git {args:?}' in integration tests"))?;
+
+    if output.status.success() != expect_failure {
+        String::from_utf8(output.stdout).context(format!(
+            "Failed to parse git {args:?} stdout in integration tests"
+        ))
+    } else {
+        let stderr = String::from_utf8(output.stderr).context(format!(
+            "Failed to parse git {args:?} stderr in integration tests"
+        ))?;
+
+        Err(anyhow!(format!(
+            "Failed to run 'git {args:?}' in integration tests: {stderr}"
+        )))
+    }
 }
 
 fn git_init(branch: &str, current_dir: &Path) -> anyhow::Result<()> {
     git(&["init", "--initial-branch", branch], current_dir)?;
+    git(
+        &["config", "--local", "user.name", "Charles Darwin"],
+        current_dir,
+    )?;
+    git(
+        &["config", "--local", "user.email", "charles.darwin@downe.uk"],
+        current_dir,
+    )?;
+    git(
+        &["config", "--local", "commit.gpgsign", "false"],
+        current_dir,
+    )?;
     git(
         &["commit", "--allow-empty", "--message", "Cambrian explosion"],
         current_dir,
