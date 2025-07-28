@@ -3,12 +3,14 @@ name: Continuous integration
 on:
   push:
   pull_request:
-    branches: [ "master" ]
+    branches: [ 'master' ]
 
 env:
   CARGO_TERM_COLOR: always
   CARGO_TERM_VERBOSE: 'true'
   cargo_workspace: ./zygal-prompt
+  rust_nightly_version: nightly-2025-07-28
+  test_report: test-report
 
 jobs:
   ci:
@@ -18,14 +20,15 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Cache cargo build output
+    - name: Cache cargo and rustup outputs
       uses: actions/cache@v4
       with:
         path: |
           ~/.cargo/registry
           ~/.cargo/git
+          ~/.rustup
           ${{ env.cargo_workspace }}/target
-        key: cargo-${{ hashFiles('**/Cargo.lock') }}
+        key: cargo-${{ hashFiles('**/Cargo.lock') }}-${{ hashFiles('~/.rustup/update-hashes/*') }}
 
     - name: Format
       run: cargo fmt --check
@@ -39,6 +42,24 @@ jobs:
       run: cargo build
       working-directory: '${{ env.cargo_workspace }}'
 
+    - name: Install nightly toolchain
+      run: |-
+        rustup toolchain install ${{ env.rust_nightly_version }} \
+            --profile minimal --no-self-update
+
     - name: Test
-      run: cargo test
+      run: |-
+        cargo +${{ env.rust_nightly_version }} test -- -Z unstable-options \
+                --format junit --report-time \
+            | split - ${{ env.test_report }}- --lines 1 \
+                --additional-suffix .xml --numeric-suffix --suffix-length 1
       working-directory: '${{ env.cargo_workspace }}'
+
+    - name: Test Report
+      uses: dorny/test-reporter@v2
+      if: ${{ !cancelled() }}
+      with:
+        path: '${{ env.test_report }}*.xml'
+        name: test-results
+        reporter: java-junit
+        working-directory: '${{ env.cargo_workspace }}'
