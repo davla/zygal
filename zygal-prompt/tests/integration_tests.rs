@@ -9,7 +9,10 @@ fn no_git_info_when_not_in_git_repository() -> anyhow::Result<()> {
     let tmp_dir = mktemp()?;
     assert_eq!(
         prompt(tmp_dir.path())?,
-        "%F{0}%K{208} %3(~.*/%1~.%~) %f%k\n%F{0}%K{208} %# %f%k "
+        format!(
+            "%F{{0}}%K{{208}} {} %f%k\n%F{{0}}%K{{208}} %# %f%k ",
+            tmp_dir.path().display()
+        )
     );
     Ok(())
 }
@@ -25,7 +28,8 @@ fn includes_git_info_when_in_git_repository() -> anyhow::Result<()> {
     assert_eq!(
         prompt(repo_root)?,
         format!(
-            "%F{{0}}%K{{208}} %3(~.*/%1~.%~) %K{{220}} [{branch}] %f%k\n%F{{0}}%K{{208}} %# %f%k "
+            "%F{{0}}%K{{208}} {} %K{{220}} [{branch}] %f%k\n%F{{0}}%K{{208}} %# %f%k ",
+            tmp_dir.path().display()
         )
     );
     Ok(())
@@ -44,7 +48,8 @@ fn includes_merging_when_merge_conflicts() -> anyhow::Result<()> {
     assert_eq!(
         prompt(repo_root)?,
         format!(
-            "%F{{0}}%K{{208}} %3(~.*/%1~.%~) %K{{220}} [{main_branch} M*+] %f%k\n%F{{0}}%K{{208}} %# %f%k "
+            "%F{{0}}%K{{208}} {} %K{{220}} [{main_branch} M*+] %f%k\n%F{{0}}%K{{208}} %# %f%k ",
+            tmp_dir.path().display()
         )
     );
     Ok(())
@@ -69,7 +74,8 @@ fn includes_rebasing_when_rebase_conflicts() -> anyhow::Result<()> {
     assert_eq!(
         prompt(repo_root)?,
         format!(
-            "%F{{0}}%K{{208}} %3(~.*/%1~.%~) %K{{220}} [({}...) B*+] %f%k\n%F{{0}}%K{{208}} %# %f%k ",
+            "%F{{0}}%K{{208}} {} %K{{220}} [({}...) B*+] %f%k\n%F{{0}}%K{{208}} %# %f%k ",
+            tmp_dir.path().display(),
             sha.trim()
         )
     );
@@ -89,7 +95,8 @@ fn includes_cherry_pick_when_cherry_pick_conflicts() -> anyhow::Result<()> {
     assert_eq!(
         prompt(repo_root)?,
         format!(
-            "%F{{0}}%K{{208}} %3(~.*/%1~.%~) %K{{220}} [{main_branch} H*+] %f%k\n%F{{0}}%K{{208}} %# %f%k "
+            "%F{{0}}%K{{208}} {} %K{{220}} [{main_branch} H*+] %f%k\n%F{{0}}%K{{208}} %# %f%k ",
+            tmp_dir.path().display()
         )
     );
     Ok(())
@@ -116,7 +123,8 @@ fn includes_revert_when_revert_conflicts() -> anyhow::Result<()> {
     assert_eq!(
         prompt(repo_root)?,
         format!(
-            "%F{{0}}%K{{208}} %3(~.*/%1~.%~) %K{{220}} [{branch} V*+] %f%k\n%F{{0}}%K{{208}} %# %f%k "
+            "%F{{0}}%K{{208}} {} %K{{220}} [{branch} V*+] %f%k\n%F{{0}}%K{{208}} %# %f%k ",
+            tmp_dir.path().display()
         )
     );
     Ok(())

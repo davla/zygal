@@ -1,14 +1,16 @@
 use std::{
+    env,
     fmt::{self, Write},
-    path::Path,
+    path::{Path, PathBuf},
 };
 
 use crate::{git_info::GitInfo, git_patch::GitPatch};
 
-const PRE_GIT: &str = "%F{0}%K{208} %3(~.*/%1~.%~) ";
-const POST_GIT: &str = "\n%F{0}%K{208} %# %f%k ";
+const CURRENT_DIR: &str = "%F{0}%K{208} ";
+const NEW_LINE: &str = "\n%F{0}%K{208} %# %f%k ";
 
 pub fn prompt(current_dir: &Path) -> anyhow::Result<String> {
+    let current_dir_content = current_dir_segment_content(current_dir);
     let git_segment = if let Some(git_info) = GitInfo::from_git_status_output(current_dir)? {
         let git_patch = GitPatch::detect(current_dir);
         let content = git_segment_content(git_info, git_patch)?;
@@ -17,7 +19,24 @@ pub fn prompt(current_dir: &Path) -> anyhow::Result<String> {
         String::new()
     };
 
-    Ok(format!("{PRE_GIT}{git_segment}%f%k{POST_GIT}"))
+    Ok(format!(
+        "{CURRENT_DIR}{current_dir_content} {git_segment}%f%k{NEW_LINE}"
+    ))
+}
+
+fn current_dir_segment_content(current_dir: &Path) -> String {
+    let current_dir = current_dir.home_to_tilde();
+    match current_dir.components().count() {
+        1 => format!("  {}  ", current_dir.display()),
+        2 | 3 => current_dir.display().to_string(),
+        _ => format!(
+            "*/{}",
+            current_dir
+                .file_name()
+                .expect("Path has at least 3 components, there must be a file name")
+                .display()
+        ),
+    }
 }
 
 fn git_segment_content(
@@ -66,83 +85,154 @@ fn shell_escape(s: &str) -> String {
     s.replace("%", "%%")
 }
 
+trait PathExtensions {
+    fn home_to_tilde(&self) -> PathBuf;
+    fn is_empty(&self) -> bool;
+}
+
+impl PathExtensions for Path {
+    fn home_to_tilde(&self) -> PathBuf {
+        let Some(from_home) = env::home_dir().and_then(|home| self.strip_prefix(&home).ok()) else {
+            return self.into();
+        };
+
+        let tilde = PathBuf::from("~");
+        // Prevent trailing slash
+        if from_home.is_empty() {
+            tilde
+        } else {
+            tilde.join(from_home)
+        }
+    }
+
+    fn is_empty(&self) -> bool {
+        self.as_os_str().is_empty()
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::git_info::GitRemoteDiff;
+    mod git_segment_content {
+        use super::super::*;
+        use crate::git_info::GitRemoteDiff;
 
-    use super::*;
+        #[test]
+        fn displays_git_segment_content_in_order() -> anyhow::Result<()> {
+            let branch = "feature/theropods";
+            let git_info = GitInfo {
+                branch_name: branch.to_string(),
+                remote_diff: Some(GitRemoteDiff {
+                    incoming: false,
+                    outgoing: false,
+                }),
+                stash: true,
+                untracked: true,
+                staged: true,
+                unstaged: true,
+            };
+            let git_patch = Some(GitPatch::Rebase);
+            let git_segment_content = git_segment_content(git_info, git_patch)?;
+            assert_eq!(git_segment_content, format!("{branch} B*+$%="));
+            Ok(())
+        }
 
-    #[test]
-    fn displays_git_segment_content_in_order() -> anyhow::Result<()> {
-        let branch = "feature/theropods";
-        let git_info = GitInfo {
-            branch_name: branch.to_string(),
-            remote_diff: Some(GitRemoteDiff {
-                incoming: false,
-                outgoing: false,
-            }),
-            stash: true,
-            untracked: true,
-            staged: true,
-            unstaged: true,
-        };
-        let git_patch = Some(GitPatch::Rebase);
-        let git_segment_content = git_segment_content(git_info, git_patch)?;
-        assert_eq!(git_segment_content, format!("{branch} B*+$%="));
-        Ok(())
+        #[test]
+        fn does_not_include_trailing_space_if_only_branch_name() -> anyhow::Result<()> {
+            let branch = "feature/mobula";
+            let git_info = GitInfo {
+                branch_name: branch.to_string(),
+                remote_diff: None,
+                stash: false,
+                untracked: false,
+                staged: false,
+                unstaged: false,
+            };
+            let git_patch = None;
+            let git_segment_content = git_segment_content(git_info, git_patch)?;
+            assert_eq!(git_segment_content, branch);
+            Ok(())
+        }
+
+        #[test]
+        fn skips_remote_symbols_if_no_remote() -> anyhow::Result<()> {
+            let branch = "feature/mellivora";
+            let git_info = GitInfo {
+                branch_name: branch.to_string(),
+                remote_diff: None,
+                stash: true,
+                untracked: false,
+                staged: true,
+                unstaged: false,
+            };
+            let git_patch = Some(GitPatch::CherryPick);
+            let git_segment_content = git_segment_content(git_info, git_patch)?;
+            assert_eq!(git_segment_content, format!("{branch} H+$"));
+            Ok(())
+        }
+
+        #[test]
+        fn skips_patch_symbol_if_no_patch() -> anyhow::Result<()> {
+            let git_patch = None;
+            let branch = "feature/ateles";
+            let git_info = GitInfo {
+                branch_name: branch.to_string(),
+                remote_diff: Some(GitRemoteDiff {
+                    incoming: false,
+                    outgoing: true,
+                }),
+                stash: false,
+                untracked: false,
+                staged: true,
+                unstaged: false,
+            };
+            let git_segment_content = git_segment_content(git_info, git_patch)?;
+            assert_eq!(git_segment_content, format!("{branch} +>"));
+            Ok(())
+        }
     }
 
-    #[test]
-    fn does_not_include_trailing_space_if_only_branch_name() -> anyhow::Result<()> {
-        let branch = "feature/mobula";
-        let git_info = GitInfo {
-            branch_name: branch.to_string(),
-            remote_diff: None,
-            stash: false,
-            untracked: false,
-            staged: false,
-            unstaged: false,
-        };
-        let git_patch = None;
-        let git_segment_content = git_segment_content(git_info, git_patch)?;
-        assert_eq!(git_segment_content, branch);
-        Ok(())
-    }
+    mod current_dir_segment_content {
+        use super::super::*;
+        use anyhow::Context;
 
-    #[test]
-    fn skips_remote_symbols_if_no_remote() -> anyhow::Result<()> {
-        let branch = "feature/mellivora";
-        let git_info = GitInfo {
-            branch_name: branch.to_string(),
-            remote_diff: None,
-            stash: true,
-            untracked: false,
-            staged: true,
-            unstaged: false,
-        };
-        let git_patch = Some(GitPatch::CherryPick);
-        let git_segment_content = git_segment_content(git_info, git_patch)?;
-        assert_eq!(git_segment_content, format!("{branch} H+$"));
-        Ok(())
-    }
+        #[test]
+        fn truncates_from_4th_nested_directory() {
+            let current_dir = Path::new("/current/working/directory");
+            let current_dir_content = current_dir_segment_content(current_dir);
+            assert_eq!(current_dir_content, "*/directory")
+        }
 
-    #[test]
-    fn skips_patch_symbol_if_no_patch() -> anyhow::Result<()> {
-        let git_patch = None;
-        let branch = "feature/ateles";
-        let git_info = GitInfo {
-            branch_name: branch.to_string(),
-            remote_diff: Some(GitRemoteDiff {
-                incoming: false,
-                outgoing: true,
-            }),
-            stash: false,
-            untracked: false,
-            staged: true,
-            unstaged: false,
-        };
-        let git_segment_content = git_segment_content(git_info, git_patch)?;
-        assert_eq!(git_segment_content, format!("{branch} +>"));
-        Ok(())
+        #[test]
+        fn does_not_truncate_until_4th_nested_directory() {
+            let current_dir = Path::new("/current/working");
+            let current_dir_content = current_dir_segment_content(current_dir);
+            assert_eq!(current_dir_content, "/current/working");
+        }
+
+        #[test]
+        fn adds_padding_to_root() {
+            let current_dir = Path::new("/");
+            let current_dir_content = current_dir_segment_content(current_dir);
+            assert_eq!(current_dir_content, "  /  ");
+        }
+
+        #[test]
+        fn replaces_home_with_tilde() -> anyhow::Result<()> {
+            let current_dir = env::home_dir()
+                .context("Couldn't retrieve home directory in tests")?
+                .join("in/home");
+            let current_dir_content = current_dir_segment_content(&current_dir);
+            assert_eq!(current_dir_content, "~/in/home");
+            Ok(())
+        }
+
+        #[test]
+        fn adds_padding_to_home() -> anyhow::Result<()> {
+            let current_dir =
+                env::home_dir().context("Couldn't retrieve home directory in tests")?;
+            let current_dir_content = current_dir_segment_content(&current_dir);
+            assert_eq!(current_dir_content, "  ~  ");
+            Ok(())
+        }
     }
 }
