@@ -193,7 +193,6 @@ mod tests {
     mod current_dir_segment_content {
         use super::super::*;
         use super::*;
-        use anyhow::Context;
 
         #[test]
         fn truncates_from_4th_nested_directory() {
@@ -217,22 +216,19 @@ mod tests {
         }
 
         #[test]
-        fn replaces_home_with_tilde() -> anyhow::Result<()> {
+        fn replaces_home_with_tilde() {
             let current_dir = env::home_dir()
-                .context("Couldn't retrieve home directory in tests")?
+                .expect("Couldn't retrieve home directory in tests")
                 .join("in/home");
             let current_dir_content = current_dir_segment_content(&current_dir);
             assert_that(current_dir_content).is_equal_to("~/in/home");
-            Ok(())
         }
 
         #[test]
-        fn adds_padding_to_home() -> anyhow::Result<()> {
-            let current_dir =
-                env::home_dir().context("Couldn't retrieve home directory in tests")?;
+        fn adds_padding_to_home() {
+            let current_dir = env::home_dir().expect("Couldn't retrieve home directory in tests");
             let current_dir_content = current_dir_segment_content(&current_dir);
             assert_that(current_dir_content).is_equal_to("  ~  ");
-            Ok(())
         }
     }
 }
