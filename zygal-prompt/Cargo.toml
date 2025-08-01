@@ -12,4 +12,5 @@ default = ["zsh"]
 zsh = []
 
 [dev-dependencies]
+asserting = "0.9.0"
 tempdir = "0.3.7"

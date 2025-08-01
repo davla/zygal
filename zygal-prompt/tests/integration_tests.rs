@@ -1,19 +1,18 @@
 use std::{fs, path::Path, process};
 
 use anyhow::{Context, anyhow};
+use asserting::prelude::*;
 use tempdir::TempDir;
+
 use zygal_prompt::prompt::prompt;
 
 #[test]
 fn no_git_info_when_not_in_git_repository() -> anyhow::Result<()> {
     let tmp_dir = mktemp()?;
-    assert_eq!(
-        prompt(tmp_dir.path())?,
-        format!(
-            "%F{{0}}%K{{208}} {} %f%k\n%F{{0}}%K{{208}} %# %f%k ",
-            tmp_dir.path().display()
-        )
-    );
+    assert_that(prompt(tmp_dir.path())).has_value(format!(
+        "%F{{0}}%K{{208}} {} %f%k\n%F{{0}}%K{{208}} %# %f%k ",
+        tmp_dir.path().display()
+    ));
     Ok(())
 }
 
@@ -25,13 +24,10 @@ fn includes_git_info_when_in_git_repository() -> anyhow::Result<()> {
     let branch = "archaea";
     git_init(branch, repo_root)?;
 
-    assert_eq!(
-        prompt(repo_root)?,
-        format!(
-            "%F{{0}}%K{{208}} {} %K{{220}} [{branch}] %f%k\n%F{{0}}%K{{208}} %# %f%k ",
-            tmp_dir.path().display()
-        )
-    );
+    assert_that(prompt(repo_root)).has_value(format!(
+        "%F{{0}}%K{{208}} {} %K{{220}} [{branch}] %f%k\n%F{{0}}%K{{208}} %# %f%k ",
+        tmp_dir.path().display()
+    ));
     Ok(())
 }
 
@@ -45,13 +41,10 @@ fn includes_merging_when_merge_conflicts() -> anyhow::Result<()> {
     create_conflicting_files(repo_root, main_branch, other_branch)?;
     spawn_git(&["merge", other_branch], repo_root, true)?;
 
-    assert_eq!(
-        prompt(repo_root)?,
-        format!(
-            "%F{{0}}%K{{208}} {} %K{{220}} [{main_branch} M*+] %f%k\n%F{{0}}%K{{208}} %# %f%k ",
-            tmp_dir.path().display()
-        )
-    );
+    assert_that(prompt(repo_root)).has_value(format!(
+        "%F{{0}}%K{{208}} {} %K{{220}} [{main_branch} M*+] %f%k\n%F{{0}}%K{{208}} %# %f%k ",
+        tmp_dir.path().display()
+    ));
     Ok(())
 }
 
@@ -71,14 +64,11 @@ fn includes_rebasing_when_rebase_conflicts() -> anyhow::Result<()> {
     )?;
 
     let sha = git(&["rev-parse", "--short", "HEAD"], repo_root)?;
-    assert_eq!(
-        prompt(repo_root)?,
-        format!(
-            "%F{{0}}%K{{208}} {} %K{{220}} [({}...) B*+] %f%k\n%F{{0}}%K{{208}} %# %f%k ",
-            tmp_dir.path().display(),
-            sha.trim()
-        )
-    );
+    assert_that(prompt(repo_root)).has_value(format!(
+        "%F{{0}}%K{{208}} {} %K{{220}} [({}...) B*+] %f%k\n%F{{0}}%K{{208}} %# %f%k ",
+        tmp_dir.path().display(),
+        sha.trim()
+    ));
     Ok(())
 }
 
@@ -92,13 +82,10 @@ fn includes_cherry_pick_when_cherry_pick_conflicts() -> anyhow::Result<()> {
     create_conflicting_files(repo_root, main_branch, other_branch)?;
     spawn_git(&["cherry-pick", other_branch], repo_root, true)?;
 
-    assert_eq!(
-        prompt(repo_root)?,
-        format!(
-            "%F{{0}}%K{{208}} {} %K{{220}} [{main_branch} H*+] %f%k\n%F{{0}}%K{{208}} %# %f%k ",
-            tmp_dir.path().display()
-        )
-    );
+    assert_that(prompt(repo_root)).has_value(format!(
+        "%F{{0}}%K{{208}} {} %K{{220}} [{main_branch} H*+] %f%k\n%F{{0}}%K{{208}} %# %f%k ",
+        tmp_dir.path().display()
+    ));
     Ok(())
 }
 
@@ -120,13 +107,10 @@ fn includes_revert_when_revert_conflicts() -> anyhow::Result<()> {
     git(&["commit", "--all", "--message", "Add hexapoda"], repo_root)?;
     spawn_git(&["revert", "HEAD^"], repo_root, true)?;
 
-    assert_eq!(
-        prompt(repo_root)?,
-        format!(
-            "%F{{0}}%K{{208}} {} %K{{220}} [{branch} V*+] %f%k\n%F{{0}}%K{{208}} %# %f%k ",
-            tmp_dir.path().display()
-        )
-    );
+    assert_that(prompt(repo_root)).has_value(format!(
+        "%F{{0}}%K{{208}} {} %K{{220}} [{branch} V*+] %f%k\n%F{{0}}%K{{208}} %# %f%k ",
+        tmp_dir.path().display()
+    ));
     Ok(())
 }
 

@@ -112,12 +112,15 @@ impl PathExtensions for Path {
 
 #[cfg(test)]
 mod tests {
+    use asserting::prelude::*;
+
     mod git_segment_content {
         use super::super::*;
+        use super::*;
         use crate::git_info::GitRemoteDiff;
 
         #[test]
-        fn displays_git_segment_content_in_order() -> anyhow::Result<()> {
+        fn displays_git_segment_content_in_order() {
             let branch = "feature/theropods";
             let git_info = GitInfo {
                 branch_name: branch.to_string(),
@@ -131,13 +134,12 @@ mod tests {
                 unstaged: true,
             };
             let git_patch = Some(GitPatch::Rebase);
-            let git_segment_content = git_segment_content(git_info, git_patch)?;
-            assert_eq!(git_segment_content, format!("{branch} B*+$%="));
-            Ok(())
+            let git_segment_content = git_segment_content(git_info, git_patch);
+            assert_that(git_segment_content).has_value(format!("{branch} B*+$%="));
         }
 
         #[test]
-        fn does_not_include_trailing_space_if_only_branch_name() -> anyhow::Result<()> {
+        fn does_not_include_trailing_space_if_only_branch_name() {
             let branch = "feature/mobula";
             let git_info = GitInfo {
                 branch_name: branch.to_string(),
@@ -148,13 +150,12 @@ mod tests {
                 unstaged: false,
             };
             let git_patch = None;
-            let git_segment_content = git_segment_content(git_info, git_patch)?;
-            assert_eq!(git_segment_content, branch);
-            Ok(())
+            let git_segment_content = git_segment_content(git_info, git_patch);
+            assert_that(git_segment_content).has_value(branch);
         }
 
         #[test]
-        fn skips_remote_symbols_if_no_remote() -> anyhow::Result<()> {
+        fn skips_remote_symbols_if_no_remote() {
             let branch = "feature/mellivora";
             let git_info = GitInfo {
                 branch_name: branch.to_string(),
@@ -165,13 +166,12 @@ mod tests {
                 unstaged: false,
             };
             let git_patch = Some(GitPatch::CherryPick);
-            let git_segment_content = git_segment_content(git_info, git_patch)?;
-            assert_eq!(git_segment_content, format!("{branch} H+$"));
-            Ok(())
+            let git_segment_content = git_segment_content(git_info, git_patch);
+            assert_that(git_segment_content).has_value(format!("{branch} H+$"));
         }
 
         #[test]
-        fn skips_patch_symbol_if_no_patch() -> anyhow::Result<()> {
+        fn skips_patch_symbol_if_no_patch() {
             let git_patch = None;
             let branch = "feature/ateles";
             let git_info = GitInfo {
@@ -185,35 +185,35 @@ mod tests {
                 staged: true,
                 unstaged: false,
             };
-            let git_segment_content = git_segment_content(git_info, git_patch)?;
-            assert_eq!(git_segment_content, format!("{branch} +>"));
-            Ok(())
+            let git_segment_content = git_segment_content(git_info, git_patch);
+            assert_that(git_segment_content).has_value(format!("{branch} +>"));
         }
     }
 
     mod current_dir_segment_content {
         use super::super::*;
+        use super::*;
         use anyhow::Context;
 
         #[test]
         fn truncates_from_4th_nested_directory() {
             let current_dir = Path::new("/current/working/directory");
             let current_dir_content = current_dir_segment_content(current_dir);
-            assert_eq!(current_dir_content, "*/directory")
+            assert_that(current_dir_content).is_equal_to("*/directory");
         }
 
         #[test]
         fn does_not_truncate_until_4th_nested_directory() {
             let current_dir = Path::new("/current/working");
             let current_dir_content = current_dir_segment_content(current_dir);
-            assert_eq!(current_dir_content, "/current/working");
+            assert_that(current_dir_content).is_equal_to("/current/working");
         }
 
         #[test]
         fn adds_padding_to_root() {
             let current_dir = Path::new("/");
             let current_dir_content = current_dir_segment_content(current_dir);
-            assert_eq!(current_dir_content, "  /  ");
+            assert_that(current_dir_content).is_equal_to("  /  ");
         }
 
         #[test]
@@ -222,7 +222,7 @@ mod tests {
                 .context("Couldn't retrieve home directory in tests")?
                 .join("in/home");
             let current_dir_content = current_dir_segment_content(&current_dir);
-            assert_eq!(current_dir_content, "~/in/home");
+            assert_that(current_dir_content).is_equal_to("~/in/home");
             Ok(())
         }
 
@@ -231,7 +231,7 @@ mod tests {
             let current_dir =
                 env::home_dir().context("Couldn't retrieve home directory in tests")?;
             let current_dir_content = current_dir_segment_content(&current_dir);
-            assert_eq!(current_dir_content, "  ~  ");
+            assert_that(current_dir_content).is_equal_to("  ~  ");
             Ok(())
         }
     }
