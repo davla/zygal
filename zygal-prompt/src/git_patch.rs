@@ -19,7 +19,10 @@ static GIT_DIRS: LazyLock<Vec<(&'static str, GitPatch)>> = LazyLock::new(|| {
 
 impl GitPatch {
     pub fn detect(current_dir: &Path) -> Option<Self> {
-        let git_dir = current_dir.join(".git");
+        let git_dir = current_dir
+            .ancestors()
+            .map(|dir| dir.join(".git"))
+            .find(|git_dir| git_dir.exists())?;
         GIT_DIRS.iter().find_map(|(git_file, git_patch)| {
             if git_dir.join(git_file).exists() {
                 Some(*git_patch)

@@ -33,14 +33,17 @@ fn includes_merging_when_merge_conflicts() {
     let tmp_dir = mktemp();
     let repo_root = tmp_dir.path();
 
+    let sub_dir_name = "plants";
+    let sub_dir = repo_root.join(sub_dir_name);
+    fs::create_dir(&sub_dir).expect("Failed to create subdirectory in integration tests");
+
     let (main_branch, other_branch) = ("angiosperms", "gymnosperms");
     git_init(main_branch, repo_root);
-    create_conflicting_files(repo_root, main_branch, other_branch);
-    spawn_git(&["merge", other_branch], repo_root, true);
+    create_conflicting_files(&sub_dir, main_branch, other_branch);
+    spawn_git(&["merge", other_branch], &sub_dir, true);
 
-    assert_that(prompt(repo_root)).has_value(format!(
-        "%F{{0}}%K{{208}} {} %K{{220}} [{main_branch} M*+] %f%k\n%F{{0}}%K{{208}} %# %f%k ",
-        tmp_dir.path().display()
+    assert_that(prompt(&sub_dir)).has_value(format!(
+        "%F{{0}}%K{{208}} */{sub_dir_name} %K{{220}} [{main_branch} M*+] %f%k\n%F{{0}}%K{{208}} %# %f%k "
     ));
 }
 
