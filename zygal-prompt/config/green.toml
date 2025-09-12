@@ -1,0 +1,11 @@
+[current-dir]
+background = 34
+foreground = 0
+
+[git]
+background = 76
+foreground = 0
+
+[new-line]
+background = 34
+foreground = 0

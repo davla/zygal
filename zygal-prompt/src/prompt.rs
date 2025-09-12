@@ -6,21 +6,34 @@ use std::{
 
 use crate::{git_info::GitInfo, git_patch::GitPatch};
 
-const CURRENT_DIR: &str = "%F{0}%K{208} ";
-const NEW_LINE: &str = "\n%F{0}%K{208} %# %f%k ";
+include!(env!("CONFIG_IN"));
 
 pub fn prompt(current_dir: &Path) -> anyhow::Result<String> {
-    let current_dir_content = current_dir_segment_content(current_dir);
+    let current_dir_segment = format!(
+        "{}{}{}",
+        config::CURRENT_DIR_PREFIX,
+        &current_dir_segment_content(current_dir),
+        config::CURRENT_DIR_SUFFIX
+    );
+
     let git_segment = if let Some(git_info) = GitInfo::from_git_status_output(current_dir)? {
         let git_patch = GitPatch::detect(current_dir);
         let content = git_segment_content(git_info, git_patch)?;
-        format!("%K{{220}} [{}] ", shell_escape(&content))
+        format!(
+            "{}{}{}",
+            config::GIT_PREFIX,
+            &shell_escape(&content),
+            config::GIT_SUFFIX
+        )
     } else {
         String::new()
     };
 
     Ok(format!(
-        "{CURRENT_DIR}{current_dir_content} {git_segment}%f%k{NEW_LINE}"
+        "{current_dir_segment}{git_segment}{}\n{}{} ",
+        config::RESET_STYLE,
+        config::NEW_LINE,
+        config::RESET_STYLE
     ))
 }
 
@@ -80,9 +93,11 @@ impl GitInfo {
     }
 }
 
-#[cfg(feature = "zsh")]
 fn shell_escape(s: &str) -> String {
-    s.replace("%", "%%")
+    match config::SHELL {
+        "zsh" => s.replace("%", "%%"),
+        _ => s.to_string(),
+    }
 }
 
 trait PathExtensions {

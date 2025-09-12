@@ -1,0 +1,3 @@
+shell = "zsh"
+new-line-content = "%#"
+space-around = true

@@ -23,7 +23,7 @@ fn includes_git_info_when_in_git_repository() {
     git_init(branch, repo_root);
 
     assert_that(prompt(repo_root)).has_value(format!(
-        "%F{{0}}%K{{208}} {} %K{{220}} [{branch}] %f%k\n%F{{0}}%K{{208}} %# %f%k ",
+        "%F{{0}}%K{{208}} {} %F{{0}}%K{{220}} {branch} %f%k\n%F{{0}}%K{{208}} %# %f%k ",
         tmp_dir.path().display()
     ));
 }
@@ -43,7 +43,7 @@ fn includes_merging_when_merge_conflicts() {
     spawn_git(&["merge", other_branch], &sub_dir, true);
 
     assert_that(prompt(&sub_dir)).has_value(format!(
-        "%F{{0}}%K{{208}} */{sub_dir_name} %K{{220}} [{main_branch} M*+] %f%k\n%F{{0}}%K{{208}} %# %f%k "
+        "%F{{0}}%K{{208}} */{sub_dir_name} %F{{0}}%K{{220}} {main_branch} M*+ %f%k\n%F{{0}}%K{{208}} %# %f%k "
     ));
 }
 
@@ -64,7 +64,7 @@ fn includes_rebasing_when_rebase_conflicts() {
 
     let sha = git(&["rev-parse", "--short", "HEAD"], repo_root);
     assert_that(prompt(repo_root)).has_value(format!(
-        "%F{{0}}%K{{208}} {} %K{{220}} [({}...) B*+] %f%k\n%F{{0}}%K{{208}} %# %f%k ",
+        "%F{{0}}%K{{208}} {} %F{{0}}%K{{220}} ({}...) B*+ %f%k\n%F{{0}}%K{{208}} %# %f%k ",
         tmp_dir.path().display(),
         sha.trim()
     ));
@@ -81,7 +81,7 @@ fn includes_cherry_pick_when_cherry_pick_conflicts() {
     spawn_git(&["cherry-pick", other_branch], repo_root, true);
 
     assert_that(prompt(repo_root)).has_value(format!(
-        "%F{{0}}%K{{208}} {} %K{{220}} [{main_branch} H*+] %f%k\n%F{{0}}%K{{208}} %# %f%k ",
+        "%F{{0}}%K{{208}} {} %F{{0}}%K{{220}} {main_branch} H*+ %f%k\n%F{{0}}%K{{208}} %# %f%k ",
         tmp_dir.path().display()
     ));
 }
@@ -105,7 +105,7 @@ fn includes_revert_when_revert_conflicts() {
     spawn_git(&["revert", "HEAD^"], repo_root, true);
 
     assert_that(prompt(repo_root)).has_value(format!(
-        "%F{{0}}%K{{208}} {} %K{{220}} [{branch} V*+] %f%k\n%F{{0}}%K{{208}} %# %f%k ",
+        "%F{{0}}%K{{208}} {} %F{{0}}%K{{220}} {branch} V*+ %f%k\n%F{{0}}%K{{208}} %# %f%k ",
         tmp_dir.path().display()
     ));
 }

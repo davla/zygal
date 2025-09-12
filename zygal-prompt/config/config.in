@@ -1,0 +1,12 @@
+mod config {{
+    pub const SHELL: &str = "{shell}";
+    pub const RESET_STYLE: &str = "{reset_style}";
+
+    pub const CURRENT_DIR_PREFIX: &str = "{current_dir_prefix}";
+    pub const CURRENT_DIR_SUFFIX: &str = "{current_dir_suffix}";
+
+    pub const GIT_PREFIX: &str = "{git_prefix}";
+    pub const GIT_SUFFIX: &str = "{git_suffix}";
+
+    pub const NEW_LINE: &str = "{new_line}";
+}}
