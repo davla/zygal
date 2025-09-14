@@ -1,17 +1,6 @@
-[package]
-name = "zygal-prompt"
-version = "0.0.1-alpha.0"
-edition = "2024"
+[workspace]
+resolver = "3"
+members = ["config", "prompt"]
 
-[dependencies]
-anyhow = "1.0.98"
-regex = "1.11.1"
-
-[dev-dependencies]
-asserting = "0.9.0"
-tempdir = "0.3.7"
-
-[build-dependencies]
-anyhow = "1.0.98"
-serde = { version = "1.0.219", features = ["derive"] }
-toml = "0.9.5"
+[profile.release]
+strip = "symbols"
