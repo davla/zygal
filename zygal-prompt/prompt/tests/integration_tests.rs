@@ -1,9 +1,9 @@
 use std::{fs, path::Path, process};
 
 use asserting::prelude::*;
-use tempdir::TempDir;
+use tempfile::TempDir;
 
-use zygal_prompt::prompt::prompt;
+use zygal_prompt::prompt;
 
 #[test]
 fn no_git_info_when_not_in_git_repository() {
@@ -35,7 +35,7 @@ fn includes_merging_when_merge_conflicts() {
 
     let sub_dir_name = "plants";
     let sub_dir = repo_root.join(sub_dir_name);
-    fs::create_dir(&sub_dir).expect("Failed to create subdirectory in integration tests");
+    fs::create_dir(&sub_dir).expect("Failed to create subdirectory in prompt integration tests");
 
     let (main_branch, other_branch) = ("angiosperms", "gymnosperms");
     git_init(main_branch, repo_root);
@@ -111,8 +111,8 @@ fn includes_revert_when_revert_conflicts() {
 }
 
 fn mktemp() -> TempDir {
-    TempDir::new("zygal-prompt-test")
-        .expect("Failed to create temporary directory in integration tests")
+    TempDir::with_prefix("zygal-prompt-test")
+        .expect("Failed to create temporary directory in prompt integration tests")
 }
 
 fn git(args: &[&str], current_dir: &Path) -> String {
@@ -120,7 +120,7 @@ fn git(args: &[&str], current_dir: &Path) -> String {
 }
 
 fn spawn_git(args: &[&str], current_dir: &Path, expect_failure: bool) -> String {
-    let err_msg = format!("Failed to run 'git {args:?}' in integration tests");
+    let err_msg = format!("Failed to run 'git {args:?}' in prompt integration tests");
     let output = process::Command::new("git")
         .args(args)
         .current_dir(current_dir)
@@ -128,12 +128,12 @@ fn spawn_git(args: &[&str], current_dir: &Path, expect_failure: bool) -> String 
         .expect(&err_msg);
 
     if output.status.success() != expect_failure {
-        let err_msg = format!("Failed to parse git {args:?} stdout in integration tests");
+        let err_msg = format!("Failed to parse git {args:?} stdout in prompt integration tests");
         String::from_utf8(output.stdout).expect(&err_msg)
     } else {
-        let err_msg = format!("Failed to parse git {args:?} stderr in integration tests");
+        let err_msg = format!("Failed to parse git {args:?} stderr in prompt integration tests");
         let stderr = String::from_utf8(output.stderr).expect(&err_msg);
-        panic!("Failed to run 'git {args:?}' in integration tests: {stderr}")
+        panic!("Failed to run 'git {args:?}' in prompt integration tests: {stderr}")
     }
 }
 

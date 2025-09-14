@@ -1,4 +1,4 @@
-use std::{fs, path::PathBuf};
+use std::{fmt, fs, path::PathBuf};
 
 use serde::Deserialize;
 
@@ -83,5 +83,41 @@ impl ColorScheme {
     pub fn read(file_name: &str) -> error::Result<Self> {
         let bytes = read_file_in_config(file_name)?;
         toml::from_slice(&bytes).err_into()
+    }
+}
+
+impl Shell {
+    pub fn foreground_escape(&self, color: &Color) -> String {
+        match self {
+            Self::Zsh => match color {
+                Color::AnsiColor(palette_color) => format!("%F{{{palette_color}}}"),
+                Color::Reset => "%f".to_string(),
+            },
+        }
+    }
+
+    pub fn background_escape(&self, color: &Color) -> String {
+        match self {
+            Self::Zsh => match color {
+                Color::AnsiColor(palette_color) => format!("%K{{{palette_color}}}"),
+                Color::Reset => "%k".to_string(),
+            },
+        }
+    }
+
+    pub fn reset_escape(&self) -> String {
+        self.foreground_escape(&Color::Reset) + &self.background_escape(&Color::Reset)
+    }
+}
+
+impl fmt::Display for Shell {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Zsh => "zsh",
+            }
+        )
     }
 }

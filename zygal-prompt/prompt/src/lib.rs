@@ -1,3 +1,5 @@
 mod git_info;
 mod git_patch;
-pub mod prompt;
+mod prompt;
+
+pub use prompt::prompt;
