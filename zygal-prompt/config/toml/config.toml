@@ -1,18 +1,64 @@
+# Default configuration
+
+# The shell Zygal is used in.
+#
+# Necessary to use shell-specific escape strings and color syntax. Using ANSI
+# colors breaks shell plugins.
 shell = "zsh"
+
+# The content of the new-line segment.
+#
+# It's forwarded as-is to the shell, so it can contain any shell-specific
+# syntax for its prompt.
 new-line-content = "%#"
+
+# Whether to add space around the content in every segment.
 space-around = true
 
+# Symbols to use in the git information segment.
+#
+# All "git" configuration keys are optional, except for the ones nested under
+# the "remote" table. The "remote" table itself is optional though.
+# If a key is not present, its symbol is not displayed.
+# The symbols are shown in the order they appear below. For example, if there
+# are stashes and untracked files, '$%' would be displayed.
 [git]
+
+# Shown in case of a merge conflict.
 merge = "M"
+
+# Shown in case of a rebase conflict or an in-progress interactive rebase.
 rebase = "B"
+
+# Shown in case of a cherry-pick conflict.
 cherry-pick = "H"
+
+# Shown in case of a revert conflict.
 revert = "V"
+
+# Shown with modified tracked files that are not staged.
 unstaged = "*"
+
+# Shown with modified tracked files that are staged.
 staged = "+"
+
+# Shown when there are stashes.
 stash = "$"
+
+# Shown when there are untracked files.
 untracked = "%"
 
+# Displays the state of the local branch in relation to its tracked (remote)
+# branch.
+# Nothing is shown if the local branch has no tracked branch.
 [git.remote]
+
+# Shown when the local branch has commits that are not present on its tracked
+# branch.
 ahead = ">"
+
+# Shown when the local branch is missing some commits from its tracked branch.
 behind = "<"
+
+# Shown when the local branch points to the same commit as its tracked branch.
 on-par = "="
