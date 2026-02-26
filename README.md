@@ -240,6 +240,36 @@ ln --symbolic "$ZSH_CUSTOM/themes/zygal/zygal.zsh-theme" "$ZSH_CUSTOM/themes"
 sed --in-place 's|ZSH_THEME=".*"|ZSH_THEME="zygal"|' "${ZDOTDIR:-$HOME}/.zshrc"
 ```
 
+### Compiling the executable
+As Zygal is meant to have configuration options embedded in the executable,
+you're supposed to compile it yourself. :stuck_out_tongue_closed_eyes:
+
+Even though the compilation itself is little more than a regular `cargo build`,
+you can use the convenience wrapper [`zygal-build.sh`](./zygal-build.sh). Some
+example usages:
+
+```sh
+# Built-in colorscheme and a custom configuration.
+# Output in a directory in PATH.
+sh zygal-build.sh build --colorscheme blue --zygal-config zygal-conf.toml
+
+# Custom color scheme and custom output path
+sh zygal-build.sh build --colorscheme zygal-colors.toml --output ~/bin/prompt
+
+# For more information, read the help text
+sh zygal-build.sh --help
+```
+
+If you don't want to use `zygal-build.sh`, replicating its behavior is quite
+straightforwards.  
+Compiling Zygal boils down to a pretty standard `cargo build --release` in the
+workspace in `zygal-prompt`. The only additional parameters are the colorscheme
+and configuration, which are provided to Cargo as the `ZYGAL_COLORSCHEME` and
+`ZYGAL_CONFIG` environment variables respectively.  
+The compiled binary needs then to be copied to the path where the shell
+integration expects it to be. That is by default a directory in `PATH`, unless
+overridden to the content of the `ZYGAL_PROMPT` environment variable.
+
 ## In-depth information
 If you made it this far into this readme consider subscribing and hitting the
 like button - oh no, this is not that type of content. :smirk:
