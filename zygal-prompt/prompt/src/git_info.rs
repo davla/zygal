@@ -3,6 +3,8 @@ use std::{fmt::Display, path::Path, process, str::FromStr, sync::LazyLock};
 use anyhow::Context;
 use regex::Regex;
 
+use crate::config;
+
 #[derive(Debug, PartialEq)]
 pub struct GitInfo {
     pub branch_name: String,
@@ -33,11 +35,16 @@ impl FromStr for GitInfo {
         let branch_name = Self::make_branch_name(&mut lines)?;
 
         let lines: Vec<&str> = lines.collect();
-        let remote_diff = GitRemoteDiff::parse(lines.iter().copied())?;
-        let stash = lines.iter().any(|l| l.starts_with("# stash"));
-        let untracked = lines.iter().any(|l| l.starts_with("?"));
-        let staged = lines.iter().any(|l| STAGED_REGEX.is_match(l));
-        let unstaged = lines.iter().any(|l| UNSTAGED_REGEX.is_match(l));
+        let stash = lines.any_if_some(config::GIT_STASH, |l| l.starts_with("# stash"));
+        let untracked = lines.any_if_some(config::GIT_UNTRACKED, |l| l.starts_with("?"));
+        let staged = lines.any_if_some(config::GIT_STAGED, |l| STAGED_REGEX.is_match(l));
+        let unstaged = lines.any_if_some(config::GIT_UNSTAGED, |l| UNSTAGED_REGEX.is_match(l));
+        // Can't use .and because it's not const
+        let remote_diff = if config::GIT_REMOTE.is_some() {
+            GitRemoteDiff::parse(lines.iter().copied())?
+        } else {
+            None
+        };
 
         Ok(Self {
             branch_name,
@@ -121,17 +128,39 @@ impl GitRemoteDiff {
 
 impl Display for GitRemoteDiff {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let config::GitRemote {
+            ahead,
+            behind,
+            on_par,
+        } = config::GIT_REMOTE.expect("[git.remote] not configured");
+
         if !self.incoming && !self.outgoing {
-            return write!(f, "=");
+            return write!(f, "{on_par}");
         }
 
         if self.incoming {
-            write!(f, "<")?;
+            write!(f, "{behind}")?;
         }
         if self.outgoing {
-            write!(f, ">")?;
+            write!(f, "{ahead}")?;
         }
         Ok(())
+    }
+}
+
+trait Lines {
+    fn any_if_some<T, F>(&self, s: Option<T>, f: F) -> bool
+    where
+        F: Fn(&&str) -> bool;
+}
+
+impl Lines for Vec<&str> {
+    #[inline]
+    fn any_if_some<T, F>(&self, s: Option<T>, f: F) -> bool
+    where
+        F: Fn(&&str) -> bool,
+    {
+        s.is_some() && self.iter().any(f)
     }
 }
 

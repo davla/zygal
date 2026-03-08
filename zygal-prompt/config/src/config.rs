@@ -36,7 +36,16 @@ pub fn write_config(
         current_dir_suffix = padding.clone(),
         git_prefix = make_prefix(&config.shell, &color_scheme.git, &padding),
         git_suffix = padding.clone(),
-        new_line = new_line
+        new_line = new_line,
+        git_merge = make_optional_string(&config.git.merge),
+        git_rebase = make_optional_string(&config.git.rebase),
+        git_cherry_pick = make_optional_string(&config.git.cherry_pick),
+        git_revert = make_optional_string(&config.git.revert),
+        git_unstaged = make_optional_string(&config.git.unstaged),
+        git_staged = make_optional_string(&config.git.staged),
+        git_stash = make_optional_string(&config.git.stash),
+        git_untracked = make_optional_string(&config.git.untracked),
+        git_remote = format!("{:?}", &config.git.remote)
     )?;
     writer.flush().err_into()
 }
@@ -47,4 +56,8 @@ fn make_prefix(shell: &crate::toml::Shell, colors: &crate::toml::Colors, padding
         shell.foreground_escape(&colors.foreground),
         shell.background_escape(&colors.background)
     )
+}
+
+fn make_optional_string(s: &Option<String>) -> String {
+    format!("{:?}", s.as_ref().filter(|text| !text.is_empty()))
 }

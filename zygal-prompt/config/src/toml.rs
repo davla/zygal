@@ -10,12 +10,36 @@ pub struct Config {
     pub shell: Shell,
     pub new_line_content: String,
     pub space_around: bool,
+    pub git: Git,
 }
 
 #[derive(Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Shell {
     Zsh,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct Git {
+    pub merge: Option<String>,
+    pub rebase: Option<String>,
+    pub cherry_pick: Option<String>,
+    pub revert: Option<String>,
+    pub unstaged: Option<String>,
+    pub staged: Option<String>,
+    pub stash: Option<String>,
+    pub untracked: Option<String>,
+    pub remote: Option<GitRemote>,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "kebab-case")]
+#[allow(dead_code)]
+pub struct GitRemote {
+    pub ahead: String,
+    pub behind: String,
+    pub on_par: String,
 }
 
 #[derive(Deserialize)]

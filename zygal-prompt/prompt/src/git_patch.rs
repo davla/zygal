@@ -1,6 +1,8 @@
-use std::{fmt::Display, path::Path, sync::LazyLock};
+use std::{collections::HashMap, fmt::Display, path::Path, sync::LazyLock};
 
-#[derive(Clone, Copy)]
+use crate::config;
+
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum GitPatch {
     Merge,
     Rebase,
@@ -8,13 +10,55 @@ pub enum GitPatch {
     Revert,
 }
 
-static GIT_DIRS: LazyLock<Vec<(&'static str, GitPatch)>> = LazyLock::new(|| {
-    vec![
-        ("MERGE_HEAD", GitPatch::Merge),
-        ("rebase-merge", GitPatch::Rebase),
-        ("CHERRY_PICK_HEAD", GitPatch::CherryPick),
-        ("REVERT_HEAD", GitPatch::Revert),
-    ]
+struct GitPatchInfo {
+    detection_path: &'static str,
+    symbol: &'static str,
+}
+
+static GIT_PATCH_INFOS: LazyLock<HashMap<GitPatch, GitPatchInfo>> = LazyLock::new(|| {
+    let mut git_patch_infos = HashMap::new();
+
+    let mut s = String::new();
+
+    if let Some(symbol) = config::GIT_MERGE {
+        s.push(' ');
+        git_patch_infos.insert(
+            GitPatch::Merge,
+            GitPatchInfo {
+                detection_path: "MERGE_HEAD",
+                symbol,
+            },
+        );
+    }
+    if let Some(symbol) = config::GIT_REBASE {
+        git_patch_infos.insert(
+            GitPatch::Rebase,
+            GitPatchInfo {
+                detection_path: "rebase-merge",
+                symbol,
+            },
+        );
+    }
+    if let Some(symbol) = config::GIT_CHERRY_PICK {
+        git_patch_infos.insert(
+            GitPatch::CherryPick,
+            GitPatchInfo {
+                detection_path: "CHERRY_PICK_HEAD",
+                symbol,
+            },
+        );
+    }
+    if let Some(symbol) = config::GIT_REVERT {
+        git_patch_infos.insert(
+            GitPatch::Revert,
+            GitPatchInfo {
+                detection_path: "REVERT_HEAD",
+                symbol,
+            },
+        );
+    }
+
+    git_patch_infos
 });
 
 impl GitPatch {
@@ -23,24 +67,23 @@ impl GitPatch {
             .ancestors()
             .map(|dir| dir.join(".git"))
             .find(|git_dir| git_dir.exists())?;
-        GIT_DIRS.iter().find_map(|(git_file, git_patch)| {
-            if git_dir.join(git_file).exists() {
-                Some(*git_patch)
-            } else {
-                None
-            }
-        })
+        GIT_PATCH_INFOS
+            .iter()
+            .find_map(|(&git_patch, git_patch_info)| {
+                git_dir
+                    .join(git_patch_info.detection_path)
+                    .exists()
+                    .then_some(git_patch)
+            })
     }
 }
 
 impl Display for GitPatch {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let symbol = match self {
-            Self::Merge => "M",
-            Self::Rebase => "B",
-            Self::CherryPick => "H",
-            Self::Revert => "V",
-        };
+        let symbol = GIT_PATCH_INFOS
+            .get(self)
+            .unwrap_or_else(|| panic!("Unknown GitPatch {self:?}"))
+            .symbol;
         write!(f, "{symbol}")
     }
 }

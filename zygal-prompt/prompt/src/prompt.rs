@@ -4,9 +4,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::{git_info::GitInfo, git_patch::GitPatch};
-
-include!(env!("CONFIG_IN"));
+use crate::{config, git_info::GitInfo, git_patch::GitPatch};
 
 pub fn prompt(current_dir: &Path) -> anyhow::Result<String> {
     let current_dir_segment = format!(
@@ -65,19 +63,14 @@ fn git_segment_content(
     if let Some(patch) = git_patch {
         write!(s, "{patch}")?;
     }
-    if git_info.unstaged {
-        s.push('*');
-    }
-    if git_info.staged {
-        s.push('+');
-    }
-    if git_info.stash {
-        s.push('$');
-    }
-    if git_info.untracked {
-        s.push('%');
-    }
-    if let Some(remote_diff) = git_info.remote_diff.as_ref() {
+    s.push_opt_str_if(config::GIT_UNSTAGED, git_info.unstaged);
+    s.push_opt_str_if(config::GIT_STAGED, git_info.staged);
+    s.push_opt_str_if(config::GIT_STASH, git_info.stash);
+    s.push_opt_str_if(config::GIT_UNTRACKED, git_info.untracked);
+    // Can't use .and because it's not const
+    if config::GIT_REMOTE.is_some()
+        && let Some(remote_diff) = git_info.remote_diff.as_ref()
+    {
         write!(s, "{remote_diff}")?;
     }
     Ok(s)
@@ -122,6 +115,19 @@ impl PathExtensions for Path {
 
     fn is_empty(&self) -> bool {
         self.as_os_str().is_empty()
+    }
+}
+
+trait StringBuilder {
+    fn push_opt_str_if(&mut self, opt_str: Option<&str>, cond: bool);
+}
+
+impl StringBuilder for String {
+    #[inline]
+    fn push_opt_str_if(&mut self, opt_str: Option<&str>, cond: bool) {
+        if cond && let Some(s) = opt_str {
+            self.push_str(s)
+        }
     }
 }
 

@@ -1,3 +1,18 @@
 shell = "zsh"
 new-line-content = "%#"
 space-around = true
+
+[git]
+merge = "M"
+rebase = "B"
+cherry-pick = "H"
+revert = "V"
+unstaged = "*"
+staged = "+"
+stash = "$"
+untracked = "%"
+
+[git.remote]
+ahead = ">"
+behind = "<"
+on-par = "="
