@@ -175,16 +175,16 @@ special value.
 
 ## Colorschemes
 ### Blue
-![blue prompt](doc/blue-prompt.png)
+![blue prompt](doc/blue.png)
 
 ### Green
-![green prompt](doc/green-prompt.png)
+![green prompt](doc/green.png)
 
 ### Orange
-![orange prompt](doc/orange-prompt.png)
+![orange prompt](doc/orange.png)
 
 ### Red
-![red prompt](doc/red-prompt.png)
+![red prompt](doc/red.png)
 
 ## Installation
 Zygal is composed of two parts: the shell integration and the executable.
