@@ -1,0 +1,3 @@
+[env]
+ZYGAL_CONFIG = "toml/config.toml"
+ZYGAL_COLORSCHEME = "toml/orange.toml"

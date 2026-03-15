@@ -1,0 +1,21 @@
+# Red colorscheme
+
+# In addition to an ANSI numeric value, all colors can be set to the "reset"
+# special value, which resets all ANSI attributes (ANSI escape \e[0m).
+#
+# All colors are optionals, and default to such "reset" special value.
+
+# ANSI color codes for the current directory segment.
+[current-dir]
+background = 160
+foreground = 0
+
+# ANSI color codes for the git segment.
+[git]
+background = 203
+foreground = 0
+
+# ANSI color codes for the new-line segment.
+[new-line]
+background = 160
+foreground = 0

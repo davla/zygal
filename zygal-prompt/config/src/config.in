@@ -1,0 +1,30 @@
+mod config {{
+    pub struct GitRemote {{
+        pub ahead: &'static str,
+        pub behind: &'static str,
+        pub on_par: &'static str,
+    }}
+
+    pub const SHELL: &str = "{shell}";
+    pub const RESET_STYLE: &str = "{reset_style}";
+
+    pub const CURRENT_DIR_PREFIX: &str = "{current_dir_prefix}";
+    pub const CURRENT_DIR_SUFFIX: &str = "{current_dir_suffix}";
+
+    pub const GIT_PREFIX: &str = "{git_prefix}";
+    pub const GIT_SUFFIX: &str = "{git_suffix}";
+
+    pub const NEW_LINE: &str = "{new_line}";
+
+    pub const GIT_MERGE: Option<&str> = {git_merge};
+    pub const GIT_REBASE: Option<&str> = {git_rebase};
+    pub const GIT_CHERRY_PICK: Option<&str> = {git_cherry_pick};
+    pub const GIT_REVERT: Option<&str> = {git_revert};
+
+    pub const GIT_UNSTAGED: Option<&str> = {git_unstaged};
+    pub const GIT_STAGED: Option<&str> = {git_staged};
+    pub const GIT_STASH: Option<&str> = {git_stash};
+    pub const GIT_UNTRACKED: Option<&str> = {git_untracked};
+
+    pub const GIT_REMOTE: Option<GitRemote> = {git_remote};
+}}

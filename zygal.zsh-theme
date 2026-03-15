@@ -1,1 +1,1 @@
-./zsh/theme.zsh
+./shell-hooks/zsh-theme.zsh
