@@ -95,7 +95,6 @@ fn shell_escape(s: &str) -> String {
 
 trait PathExtensions {
     fn home_to_tilde(&self) -> PathBuf;
-    fn is_empty(&self) -> bool;
 }
 
 impl PathExtensions for Path {
@@ -106,15 +105,11 @@ impl PathExtensions for Path {
 
         let tilde = PathBuf::from("~");
         // Prevent trailing slash
-        if from_home.is_empty() {
+        if from_home.as_os_str().is_empty() {
             tilde
         } else {
             tilde.join(from_home)
         }
-    }
-
-    fn is_empty(&self) -> bool {
-        self.as_os_str().is_empty()
     }
 }
 
